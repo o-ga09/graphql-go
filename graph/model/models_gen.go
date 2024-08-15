@@ -8,6 +8,30 @@ import (
 	"github.com/google/uuid"
 )
 
+type DeleteNote struct {
+	ID string `json:"id"`
+}
+
+type DeleteUser struct {
+	ID string `json:"id"`
+}
+
+type DeletedNote struct {
+	ID string `json:"id"`
+}
+
+type DeletedUser struct {
+	ID string `json:"id"`
+}
+
+type EditedNote struct {
+	ID string `json:"id"`
+}
+
+type EditedUser struct {
+	ID string `json:"id"`
+}
+
 type Mutation struct {
 }
 
@@ -38,6 +62,24 @@ type Note struct {
 }
 
 type Query struct {
+}
+
+type UpdateNote struct {
+	ID      string    `json:"id"`
+	Content *string   `json:"content,omitempty"`
+	Tags    []*string `json:"tags,omitempty"`
+	Title   *string   `json:"title,omitempty"`
+}
+
+type UpdateUser struct {
+	ID        string  `json:"id"`
+	FirstName *string `json:"first_name,omitempty"`
+	LastName  *string `json:"last_name,omitempty"`
+	Email     *string `json:"email,omitempty"`
+	Address   *string `json:"address,omitempty"`
+	Sex       *int    `json:"sex,omitempty"`
+	Password  *string `json:"password,omitempty"`
+	BirthDay  *string `json:"birth_day,omitempty"`
 }
 
 type User struct {

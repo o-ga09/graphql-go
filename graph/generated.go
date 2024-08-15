@@ -48,13 +48,29 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	DeletedNote struct {
+		ID func(childComplexity int) int
+	}
+
+	DeletedUser struct {
+		ID func(childComplexity int) int
+	}
+
+	EditedNote struct {
+		ID func(childComplexity int) int
+	}
+
+	EditedUser struct {
+		ID func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateNote func(childComplexity int, input model.NewNote) int
 		CreateUser func(childComplexity int, input model.NewUser) int
-		DeleteNote func(childComplexity int, input model.NewNote) int
-		DeleteUser func(childComplexity int, input model.NewUser) int
-		UpdateNote func(childComplexity int, input model.NewNote) int
-		UpdateUser func(childComplexity int, input model.NewUser) int
+		DeleteNote func(childComplexity int, input model.DeleteNote) int
+		DeleteUser func(childComplexity int, input model.DeleteUser) int
+		UpdateNote func(childComplexity int, input model.UpdateNote) int
+		UpdateUser func(childComplexity int, input model.UpdateUser) int
 	}
 
 	Note struct {
@@ -87,12 +103,12 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateNote(ctx context.Context, input model.NewNote) (*model.Note, error)
-	UpdateNote(ctx context.Context, input model.NewNote) (*model.Note, error)
-	DeleteNote(ctx context.Context, input model.NewNote) (*model.Note, error)
-	CreateUser(ctx context.Context, input model.NewUser) (*model.User, error)
-	UpdateUser(ctx context.Context, input model.NewUser) (*model.User, error)
-	DeleteUser(ctx context.Context, input model.NewUser) (*model.User, error)
+	CreateNote(ctx context.Context, input model.NewNote) (*model.EditedNote, error)
+	UpdateNote(ctx context.Context, input model.UpdateNote) (*model.EditedNote, error)
+	DeleteNote(ctx context.Context, input model.DeleteNote) (*model.DeletedNote, error)
+	CreateUser(ctx context.Context, input model.NewUser) (*model.EditedUser, error)
+	UpdateUser(ctx context.Context, input model.UpdateUser) (*model.EditedUser, error)
+	DeleteUser(ctx context.Context, input model.DeleteUser) (*model.DeletedUser, error)
 }
 type QueryResolver interface {
 	Notes(ctx context.Context) ([]*model.Note, error)
@@ -117,6 +133,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "DeletedNote.id":
+		if e.complexity.DeletedNote.ID == nil {
+			break
+		}
+
+		return e.complexity.DeletedNote.ID(childComplexity), true
+
+	case "DeletedUser.id":
+		if e.complexity.DeletedUser.ID == nil {
+			break
+		}
+
+		return e.complexity.DeletedUser.ID(childComplexity), true
+
+	case "EditedNote.id":
+		if e.complexity.EditedNote.ID == nil {
+			break
+		}
+
+		return e.complexity.EditedNote.ID(childComplexity), true
+
+	case "EditedUser.id":
+		if e.complexity.EditedUser.ID == nil {
+			break
+		}
+
+		return e.complexity.EditedUser.ID(childComplexity), true
 
 	case "Mutation.createNote":
 		if e.complexity.Mutation.CreateNote == nil {
@@ -152,7 +196,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteNote(childComplexity, args["input"].(model.NewNote)), true
+		return e.complexity.Mutation.DeleteNote(childComplexity, args["input"].(model.DeleteNote)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -164,7 +208,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteUser(childComplexity, args["input"].(model.NewUser)), true
+		return e.complexity.Mutation.DeleteUser(childComplexity, args["input"].(model.DeleteUser)), true
 
 	case "Mutation.updateNote":
 		if e.complexity.Mutation.UpdateNote == nil {
@@ -176,7 +220,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateNote(childComplexity, args["input"].(model.NewNote)), true
+		return e.complexity.Mutation.UpdateNote(childComplexity, args["input"].(model.UpdateNote)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -188,7 +232,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.NewUser)), true
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUser)), true
 
 	case "Note.content":
 		if e.complexity.Note.Content == nil {
@@ -331,8 +375,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputDeleteNote,
+		ec.unmarshalInputDeleteUser,
 		ec.unmarshalInputNewNote,
 		ec.unmarshalInputNewUser,
+		ec.unmarshalInputUpdateNote,
+		ec.unmarshalInputUpdateUser,
 	)
 	first := true
 
@@ -470,6 +518,17 @@ input NewNote {
   title: String!
 }
 
+input UpdateNote {
+  id: ID!
+  content: String
+  tags: [String]
+  title: String
+}
+
+input DeleteNote {
+  id: ID!
+}
+
 input NewUser {
   first_name: String!
   last_name: String!
@@ -480,13 +539,44 @@ input NewUser {
   birth_day: String!
 }
 
+input UpdateUser {
+  id: ID!
+  first_name: String
+  last_name: String
+  email: String
+  address: String
+  sex: Int
+  password: String
+  birth_day: String
+}
+
+input DeleteUser {
+  id: ID!
+}
+
+type EditedNote {
+  id: ID!
+}
+
+type DeletedNote {
+  id: ID!
+}
+
+type EditedUser {
+  id: ID!
+}
+
+type DeletedUser {
+  id: ID!
+}
+
 type Mutation {
-  createNote(input: NewNote!): Note!
-  updateNote(input: NewNote!): Note!
-  deleteNote(input: NewNote!): Note!
-  createUser(input: NewUser!): User!
-  updateUser(input: NewUser!): User!
-  deleteUser(input: NewUser!): User!
+  createNote(input: NewNote!): EditedNote!
+  updateNote(input: UpdateNote!): EditedNote!
+  deleteNote(input: DeleteNote!): DeletedNote!
+  createUser(input: NewUser!): EditedUser!
+  updateUser(input: UpdateUser!): EditedUser!
+  deleteUser(input: DeleteUser!): DeletedUser!
 }
 `, BuiltIn: false},
 }
@@ -529,10 +619,10 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewNote
+	var arg0 model.DeleteNote
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNewNote(ctx, tmp)
+		arg0, err = ec.unmarshalNDeleteNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeleteNote(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -544,10 +634,10 @@ func (ec *executionContext) field_Mutation_deleteNote_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewUser
+	var arg0 model.DeleteUser
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNewUser(ctx, tmp)
+		arg0, err = ec.unmarshalNDeleteUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeleteUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -559,10 +649,10 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewNote
+	var arg0 model.UpdateNote
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNewNote(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUpdateNote(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -574,10 +664,10 @@ func (ec *executionContext) field_Mutation_updateNote_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewUser
+	var arg0 model.UpdateUser
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNewUser(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUpdateUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -639,6 +729,182 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _DeletedNote_id(ctx context.Context, field graphql.CollectedField, obj *model.DeletedNote) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeletedNote_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeletedNote_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeletedNote",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeletedUser_id(ctx context.Context, field graphql.CollectedField, obj *model.DeletedUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeletedUser_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeletedUser_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeletedUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EditedNote_id(ctx context.Context, field graphql.CollectedField, obj *model.EditedNote) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EditedNote_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EditedNote_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EditedNote",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EditedUser_id(ctx context.Context, field graphql.CollectedField, obj *model.EditedUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EditedUser_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EditedUser_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EditedUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createNote(ctx, field)
 	if err != nil {
@@ -665,9 +931,9 @@ func (ec *executionContext) _Mutation_createNote(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Note)
+	res := resTmp.(*model.EditedNote)
 	fc.Result = res
-	return ec.marshalNNote2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalNEditedNote2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐEditedNote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createNote(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -679,21 +945,9 @@ func (ec *executionContext) fieldContext_Mutation_createNote(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Note_id(ctx, field)
-			case "content":
-				return ec.fieldContext_Note_content(ctx, field)
-			case "tags":
-				return ec.fieldContext_Note_tags(ctx, field)
-			case "title":
-				return ec.fieldContext_Note_title(ctx, field)
-			case "user":
-				return ec.fieldContext_Note_user(ctx, field)
-			case "CreatedDateTime":
-				return ec.fieldContext_Note_CreatedDateTime(ctx, field)
-			case "UpdatedDateTime":
-				return ec.fieldContext_Note_UpdatedDateTime(ctx, field)
+				return ec.fieldContext_EditedNote_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Note", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type EditedNote", field.Name)
 		},
 	}
 	defer func() {
@@ -724,7 +978,7 @@ func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateNote(rctx, fc.Args["input"].(model.NewNote))
+		return ec.resolvers.Mutation().UpdateNote(rctx, fc.Args["input"].(model.UpdateNote))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -736,9 +990,9 @@ func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Note)
+	res := resTmp.(*model.EditedNote)
 	fc.Result = res
-	return ec.marshalNNote2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalNEditedNote2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐEditedNote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateNote(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -750,21 +1004,9 @@ func (ec *executionContext) fieldContext_Mutation_updateNote(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Note_id(ctx, field)
-			case "content":
-				return ec.fieldContext_Note_content(ctx, field)
-			case "tags":
-				return ec.fieldContext_Note_tags(ctx, field)
-			case "title":
-				return ec.fieldContext_Note_title(ctx, field)
-			case "user":
-				return ec.fieldContext_Note_user(ctx, field)
-			case "CreatedDateTime":
-				return ec.fieldContext_Note_CreatedDateTime(ctx, field)
-			case "UpdatedDateTime":
-				return ec.fieldContext_Note_UpdatedDateTime(ctx, field)
+				return ec.fieldContext_EditedNote_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Note", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type EditedNote", field.Name)
 		},
 	}
 	defer func() {
@@ -795,7 +1037,7 @@ func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteNote(rctx, fc.Args["input"].(model.NewNote))
+		return ec.resolvers.Mutation().DeleteNote(rctx, fc.Args["input"].(model.DeleteNote))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -807,9 +1049,9 @@ func (ec *executionContext) _Mutation_deleteNote(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Note)
+	res := resTmp.(*model.DeletedNote)
 	fc.Result = res
-	return ec.marshalNNote2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNote(ctx, field.Selections, res)
+	return ec.marshalNDeletedNote2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeletedNote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteNote(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -821,21 +1063,9 @@ func (ec *executionContext) fieldContext_Mutation_deleteNote(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Note_id(ctx, field)
-			case "content":
-				return ec.fieldContext_Note_content(ctx, field)
-			case "tags":
-				return ec.fieldContext_Note_tags(ctx, field)
-			case "title":
-				return ec.fieldContext_Note_title(ctx, field)
-			case "user":
-				return ec.fieldContext_Note_user(ctx, field)
-			case "CreatedDateTime":
-				return ec.fieldContext_Note_CreatedDateTime(ctx, field)
-			case "UpdatedDateTime":
-				return ec.fieldContext_Note_UpdatedDateTime(ctx, field)
+				return ec.fieldContext_DeletedNote_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Note", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type DeletedNote", field.Name)
 		},
 	}
 	defer func() {
@@ -878,9 +1108,9 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.User)
+	res := resTmp.(*model.EditedUser)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNEditedUser2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐEditedUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -892,27 +1122,9 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "first_name":
-				return ec.fieldContext_User_first_name(ctx, field)
-			case "last_name":
-				return ec.fieldContext_User_last_name(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "address":
-				return ec.fieldContext_User_address(ctx, field)
-			case "sex":
-				return ec.fieldContext_User_sex(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
-			case "birth_day":
-				return ec.fieldContext_User_birth_day(ctx, field)
-			case "CreatedDateTime":
-				return ec.fieldContext_User_CreatedDateTime(ctx, field)
-			case "UpdatedDateTime":
-				return ec.fieldContext_User_UpdatedDateTime(ctx, field)
+				return ec.fieldContext_EditedUser_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type EditedUser", field.Name)
 		},
 	}
 	defer func() {
@@ -943,7 +1155,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["input"].(model.NewUser))
+		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["input"].(model.UpdateUser))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -955,9 +1167,9 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.User)
+	res := resTmp.(*model.EditedUser)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNEditedUser2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐEditedUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -969,27 +1181,9 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "first_name":
-				return ec.fieldContext_User_first_name(ctx, field)
-			case "last_name":
-				return ec.fieldContext_User_last_name(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "address":
-				return ec.fieldContext_User_address(ctx, field)
-			case "sex":
-				return ec.fieldContext_User_sex(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
-			case "birth_day":
-				return ec.fieldContext_User_birth_day(ctx, field)
-			case "CreatedDateTime":
-				return ec.fieldContext_User_CreatedDateTime(ctx, field)
-			case "UpdatedDateTime":
-				return ec.fieldContext_User_UpdatedDateTime(ctx, field)
+				return ec.fieldContext_EditedUser_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type EditedUser", field.Name)
 		},
 	}
 	defer func() {
@@ -1020,7 +1214,7 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteUser(rctx, fc.Args["input"].(model.NewUser))
+		return ec.resolvers.Mutation().DeleteUser(rctx, fc.Args["input"].(model.DeleteUser))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1032,9 +1226,9 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.User)
+	res := resTmp.(*model.DeletedUser)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNDeletedUser2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeletedUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1046,27 +1240,9 @@ func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "first_name":
-				return ec.fieldContext_User_first_name(ctx, field)
-			case "last_name":
-				return ec.fieldContext_User_last_name(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "address":
-				return ec.fieldContext_User_address(ctx, field)
-			case "sex":
-				return ec.fieldContext_User_sex(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
-			case "birth_day":
-				return ec.fieldContext_User_birth_day(ctx, field)
-			case "CreatedDateTime":
-				return ec.fieldContext_User_CreatedDateTime(ctx, field)
-			case "UpdatedDateTime":
-				return ec.fieldContext_User_UpdatedDateTime(ctx, field)
+				return ec.fieldContext_DeletedUser_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type DeletedUser", field.Name)
 		},
 	}
 	defer func() {
@@ -3881,6 +4057,60 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputDeleteNote(ctx context.Context, obj interface{}) (model.DeleteNote, error) {
+	var it model.DeleteNote
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeleteUser(ctx context.Context, obj interface{}) (model.DeleteUser, error) {
+	var it model.DeleteUser
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewNote(ctx context.Context, obj interface{}) (model.NewNote, error) {
 	var it model.NewNote
 	asMap := map[string]interface{}{}
@@ -3991,6 +4221,130 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateNote(ctx context.Context, obj interface{}) (model.UpdateNote, error) {
+	var it model.UpdateNote
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "content", "tags", "title"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "content":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Content = data
+		case "tags":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			data, err := ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Tags = data
+		case "title":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Title = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj interface{}) (model.UpdateUser, error) {
+	var it model.UpdateUser
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "first_name", "last_name", "email", "address", "sex", "password", "birth_day"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "first_name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first_name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FirstName = data
+		case "last_name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last_name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LastName = data
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "address":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Address = data
+		case "sex":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sex"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Sex = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		case "birth_day":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("birth_day"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BirthDay = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3998,6 +4352,162 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var deletedNoteImplementors = []string{"DeletedNote"}
+
+func (ec *executionContext) _DeletedNote(ctx context.Context, sel ast.SelectionSet, obj *model.DeletedNote) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deletedNoteImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeletedNote")
+		case "id":
+			out.Values[i] = ec._DeletedNote_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var deletedUserImplementors = []string{"DeletedUser"}
+
+func (ec *executionContext) _DeletedUser(ctx context.Context, sel ast.SelectionSet, obj *model.DeletedUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deletedUserImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeletedUser")
+		case "id":
+			out.Values[i] = ec._DeletedUser_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var editedNoteImplementors = []string{"EditedNote"}
+
+func (ec *executionContext) _EditedNote(ctx context.Context, sel ast.SelectionSet, obj *model.EditedNote) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, editedNoteImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EditedNote")
+		case "id":
+			out.Values[i] = ec._EditedNote_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var editedUserImplementors = []string{"EditedUser"}
+
+func (ec *executionContext) _EditedUser(ctx context.Context, sel ast.SelectionSet, obj *model.EditedUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, editedUserImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EditedUser")
+		case "id":
+			out.Values[i] = ec._EditedUser_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var mutationImplementors = []string{"Mutation"}
 
@@ -4686,6 +5196,87 @@ func (ec *executionContext) marshalNDateTime2timeᚐTime(ctx context.Context, se
 	return res
 }
 
+func (ec *executionContext) unmarshalNDeleteNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeleteNote(ctx context.Context, v interface{}) (model.DeleteNote, error) {
+	res, err := ec.unmarshalInputDeleteNote(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeleteUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeleteUser(ctx context.Context, v interface{}) (model.DeleteUser, error) {
+	res, err := ec.unmarshalInputDeleteUser(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDeletedNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeletedNote(ctx context.Context, sel ast.SelectionSet, v model.DeletedNote) graphql.Marshaler {
+	return ec._DeletedNote(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDeletedNote2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeletedNote(ctx context.Context, sel ast.SelectionSet, v *model.DeletedNote) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DeletedNote(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDeletedUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeletedUser(ctx context.Context, sel ast.SelectionSet, v model.DeletedUser) graphql.Marshaler {
+	return ec._DeletedUser(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDeletedUser2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐDeletedUser(ctx context.Context, sel ast.SelectionSet, v *model.DeletedUser) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DeletedUser(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNEditedNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐEditedNote(ctx context.Context, sel ast.SelectionSet, v model.EditedNote) graphql.Marshaler {
+	return ec._EditedNote(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEditedNote2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐEditedNote(ctx context.Context, sel ast.SelectionSet, v *model.EditedNote) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._EditedNote(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNEditedUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐEditedUser(ctx context.Context, sel ast.SelectionSet, v model.EditedUser) graphql.Marshaler {
+	return ec._EditedUser(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEditedUser2ᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐEditedUser(ctx context.Context, sel ast.SelectionSet, v *model.EditedUser) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._EditedUser(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4709,10 +5300,6 @@ func (ec *executionContext) unmarshalNNewNote2githubᚗcomᚋoᚑga09ᚋgraphql�
 func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {
 	res, err := ec.unmarshalInputNewUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNote(ctx context.Context, sel ast.SelectionSet, v model.Note) graphql.Marshaler {
-	return ec._Note(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNNote2ᚕᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐNoteᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Note) graphql.Marshaler {
@@ -4831,8 +5418,14 @@ func (ec *executionContext) marshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
-	return ec._User(ctx, sel, &v)
+func (ec *executionContext) unmarshalNUpdateNote2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUpdateNote(ctx context.Context, v interface{}) (model.UpdateNote, error) {
+	res, err := ec.unmarshalInputUpdateNote(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateUser2githubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUpdateUser(ctx context.Context, v interface{}) (model.UpdateUser, error) {
+	res, err := ec.unmarshalInputUpdateUser(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋoᚑga09ᚋgraphqlᚑgoᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
@@ -5166,6 +5759,54 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

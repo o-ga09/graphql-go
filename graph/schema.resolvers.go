@@ -6,40 +6,111 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/o-ga09/graphql-go/domain"
 	"github.com/o-ga09/graphql-go/graph/model"
 )
 
 // CreateNote is the resolver for the createNote field.
-func (r *mutationResolver) CreateNote(ctx context.Context, input model.NewNote) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented: CreateNote - createNote"))
+func (r *mutationResolver) CreateNote(ctx context.Context, input model.NewNote) (*model.EditedNote, error) {
+	createdNote, err := r.NoteService.CreateNote(ctx, &domain.Note{
+		Title:   input.Title,
+		Content: input.Content,
+		Tags:    input.Tags,
+	})
+	if err != nil {
+		return nil, err
+	}
+	id, err := uuid.Parse(createdNote.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.EditedNote{
+		ID: id.String(),
+	}, nil
 }
 
 // UpdateNote is the resolver for the updateNote field.
-func (r *mutationResolver) UpdateNote(ctx context.Context, input model.NewNote) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented: UpdateNote - updateNote"))
+func (r *mutationResolver) UpdateNote(ctx context.Context, input model.UpdateNote) (*model.EditedNote, error) {
+	tags := make([]string, len(input.Tags))
+	for i, tag := range input.Tags {
+		tags[i] = *tag
+	}
+	updatedNote, err := r.NoteService.UpdateNoteById(ctx, input.ID, &domain.Note{
+		Title:   *input.Title,
+		Content: *input.Content,
+		Tags:    tags,
+	})
+	if err != nil {
+		return nil, err
+	}
+	id, err := uuid.Parse(updatedNote.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.EditedNote{
+		ID: id.String(),
+	}, nil
 }
 
 // DeleteNote is the resolver for the deleteNote field.
-func (r *mutationResolver) DeleteNote(ctx context.Context, input model.NewNote) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented: DeleteNote - deleteNote"))
+func (r *mutationResolver) DeleteNote(ctx context.Context, input model.DeleteNote) (*model.DeletedNote, error) {
+	err := r.NoteService.DeleteNoteById(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.DeletedNote{
+		ID: input.ID,
+	}, nil
 }
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.EditedUser, error) {
+	createdUser, err := r.UserService.CreateUser(ctx, &domain.User{
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		Email:     input.Email,
+		Address:   input.Address,
+		BirthDay:  input.BirthDay,
+		Password:  input.Password,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &model.EditedUser{
+		ID: createdUser.ID,
+	}, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
+func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUser) (*model.EditedUser, error) {
+	updatedUser, err := r.UserService.UpdateUserById(ctx, input.ID, &domain.User{
+		FirstName: *input.FirstName,
+		LastName:  *input.LastName,
+		Email:     *input.Email,
+		Address:   *input.Address,
+		BirthDay:  *input.BirthDay,
+		Password:  *input.Password,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &model.EditedUser{
+		ID: updatedUser.ID,
+	}, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+func (r *mutationResolver) DeleteUser(ctx context.Context, input model.DeleteUser) (*model.DeletedUser, error) {
+	err := r.UserService.DeleteUserById(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.DeletedUser{
+		ID: input.ID,
+	}, nil
 }
 
 // Notes is the resolver for the notes field.
@@ -49,6 +120,19 @@ func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
 		return nil, err
 	}
 	res := []*model.Note{}
+	userid, _ := uuid.NewUUID()
+	user := &model.User{
+		ID:              userid,
+		FirstName:       "",
+		LastName:        "",
+		Email:           "",
+		Address:         "",
+		BirthDay:        "",
+		Password:        "",
+		Sex:             0,
+		CreatedDateTime: time.Now(),
+		UpdatedDateTime: time.Now(),
+	}
 	for _, n := range note {
 		id, err := uuid.Parse(n.ID)
 		if err != nil {
@@ -59,6 +143,7 @@ func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
 			Title:           n.Title,
 			Content:         n.Content,
 			Tags:            n.Tags,
+			User:            user,
 			CreatedDateTime: n.CreatedDateTime,
 			UpdatedDateTime: n.UpdatedDateTime,
 		})

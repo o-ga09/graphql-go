@@ -38,6 +38,17 @@ input NewNote {
   title: String!
 }
 
+input UpdateNote {
+  id: ID!
+  content: String
+  tags: [String]
+  title: String
+}
+
+input DeleteNote {
+  id: ID!
+}
+
 input NewUser {
   first_name: String!
   last_name: String!
@@ -48,11 +59,42 @@ input NewUser {
   birth_day: String!
 }
 
+input UpdateUser {
+  id: ID!
+  first_name: String
+  last_name: String
+  email: String
+  address: String
+  sex: Int
+  password: String
+  birth_day: String
+}
+
+input DeleteUser {
+  id: ID!
+}
+
+type EditedNote {
+  id: ID!
+}
+
+type DeletedNote {
+  id: ID!
+}
+
+type EditedUser {
+  id: ID!
+}
+
+type DeletedUser {
+  id: ID!
+}
+
 type Mutation {
-  createNote(input: NewNote!): Note!
-  updateNote(input: NewNote!): Note!
-  deleteNote(input: NewNote!): Note!
-  createUser(input: NewUser!): User!
-  updateUser(input: NewUser!): User!
-  deleteUser(input: NewUser!): User!
+  createNote(input: NewNote!): EditedNote!
+  updateNote(input: UpdateNote!): EditedNote!
+  deleteNote(input: DeleteNote!): DeletedNote!
+  createUser(input: NewUser!): EditedUser!
+  updateUser(input: UpdateUser!): EditedUser!
+  deleteUser(input: DeleteUser!): DeletedUser!
 }
