@@ -1,0 +1,24 @@
+linters-settings:
+  govet:
+    check-shadowing: false
+  gocyclo:
+    min-complexity: 30
+  misspell:
+    locale: US
+  skip-files:
+    - test/**/*_test.go
+    - api/*.go
+
+linters:
+  disable-all: true
+  enable:
+    - goimports
+    - unused
+    - errcheck
+    - gocognit
+    - gocyclo
+    - gofmt
+    - govet
+    - misspell
+    - staticcheck
+    - whitespace
