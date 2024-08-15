@@ -10,12 +10,14 @@ ORDER BY created_at DESC;
 INSERT INTO notes (
     note_id,
     title,
+    tags,
     content
-) VALUES (?, ?, ?);
+) VALUES (?, ?, ?, ?);
 
 -- name: UpdateNote :exec
 UPDATE notes
 SET title = ?,
+    tags = ?,
     content = ?
 WHERE note_id = ?;
 
@@ -28,8 +30,11 @@ INSERT INTO users (
     user_id,
     name,
     email,
+    address,
+    sex,
+    birthday,
     password
-) VALUES (?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetUser :one
 SELECT * FROM users
@@ -43,6 +48,9 @@ ORDER BY created_at DESC;
 UPDATE users
 SET name = ?,
     email = ?,
+    address = ?,
+    sex = ?,
+    birthday = ?,
     password = ?
 WHERE user_id = ?;
 

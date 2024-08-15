@@ -14,18 +14,25 @@ const createNote = `-- name: CreateNote :execresult
 INSERT INTO notes (
     note_id,
     title,
+    tags,
     content
-) VALUES (?, ?, ?)
+) VALUES (?, ?, ?, ?)
 `
 
 type CreateNoteParams struct {
 	NoteID  string
 	Title   string
+	Tags    string
 	Content string
 }
 
 func (q *Queries) CreateNote(ctx context.Context, arg CreateNoteParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createNote, arg.NoteID, arg.Title, arg.Content)
+	return q.db.ExecContext(ctx, createNote,
+		arg.NoteID,
+		arg.Title,
+		arg.Tags,
+		arg.Content,
+	)
 }
 
 const createUser = `-- name: CreateUser :execresult
@@ -33,14 +40,20 @@ INSERT INTO users (
     user_id,
     name,
     email,
+    address,
+    sex,
+    birthday,
     password
-) VALUES (?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateUserParams struct {
 	UserID   string
 	Name     string
 	Email    string
+	Address  string
+	Sex      int32
+	Birthday string
 	Password string
 }
 
@@ -49,6 +62,9 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 		arg.UserID,
 		arg.Name,
 		arg.Email,
+		arg.Address,
+		arg.Sex,
+		arg.Birthday,
 		arg.Password,
 	)
 }
@@ -74,7 +90,7 @@ func (q *Queries) DeleteUser(ctx context.Context, userID string) error {
 }
 
 const getNote = `-- name: GetNote :one
-SELECT id, note_id, title, content, created_at, updated_at FROM notes
+SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes
 WHERE note_id = ? LIMIT 1
 `
 
@@ -85,6 +101,7 @@ func (q *Queries) GetNote(ctx context.Context, noteID string) (Note, error) {
 		&i.ID,
 		&i.NoteID,
 		&i.Title,
+		&i.Tags,
 		&i.Content,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -93,7 +110,7 @@ func (q *Queries) GetNote(ctx context.Context, noteID string) (Note, error) {
 }
 
 const getNotes = `-- name: GetNotes :many
-SELECT id, note_id, title, content, created_at, updated_at FROM notes
+SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes
 ORDER BY created_at DESC
 `
 
@@ -110,6 +127,7 @@ func (q *Queries) GetNotes(ctx context.Context) ([]Note, error) {
 			&i.ID,
 			&i.NoteID,
 			&i.Title,
+			&i.Tags,
 			&i.Content,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -128,7 +146,7 @@ func (q *Queries) GetNotes(ctx context.Context) ([]Note, error) {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, user_id, name, email, password, created_at, updated_at FROM users
+SELECT id, user_id, name, address, email, password, sex, birthday, created_at, updated_at FROM users
 WHERE user_id = ? LIMIT 1
 `
 
@@ -139,8 +157,11 @@ func (q *Queries) GetUser(ctx context.Context, userID string) (User, error) {
 		&i.ID,
 		&i.UserID,
 		&i.Name,
+		&i.Address,
 		&i.Email,
 		&i.Password,
+		&i.Sex,
+		&i.Birthday,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -148,7 +169,7 @@ func (q *Queries) GetUser(ctx context.Context, userID string) (User, error) {
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, user_id, name, email, password, created_at, updated_at FROM users
+SELECT id, user_id, name, address, email, password, sex, birthday, created_at, updated_at FROM users
 ORDER BY created_at DESC
 `
 
@@ -165,8 +186,11 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 			&i.ID,
 			&i.UserID,
 			&i.Name,
+			&i.Address,
 			&i.Email,
 			&i.Password,
+			&i.Sex,
+			&i.Birthday,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -186,18 +210,25 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 const updateNote = `-- name: UpdateNote :exec
 UPDATE notes
 SET title = ?,
+    tags = ?,
     content = ?
 WHERE note_id = ?
 `
 
 type UpdateNoteParams struct {
 	Title   string
+	Tags    string
 	Content string
 	NoteID  string
 }
 
 func (q *Queries) UpdateNote(ctx context.Context, arg UpdateNoteParams) error {
-	_, err := q.db.ExecContext(ctx, updateNote, arg.Title, arg.Content, arg.NoteID)
+	_, err := q.db.ExecContext(ctx, updateNote,
+		arg.Title,
+		arg.Tags,
+		arg.Content,
+		arg.NoteID,
+	)
 	return err
 }
 
@@ -205,6 +236,9 @@ const updateUser = `-- name: UpdateUser :exec
 UPDATE users
 SET name = ?,
     email = ?,
+    address = ?,
+    sex = ?,
+    birthday = ?,
     password = ?
 WHERE user_id = ?
 `
@@ -212,6 +246,9 @@ WHERE user_id = ?
 type UpdateUserParams struct {
 	Name     string
 	Email    string
+	Address  string
+	Sex      int32
+	Birthday string
 	Password string
 	UserID   string
 }
@@ -220,6 +257,9 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	_, err := q.db.ExecContext(ctx, updateUser,
 		arg.Name,
 		arg.Email,
+		arg.Address,
+		arg.Sex,
+		arg.Birthday,
 		arg.Password,
 		arg.UserID,
 	)
