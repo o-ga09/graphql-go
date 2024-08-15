@@ -62,8 +62,9 @@ func (u *userDao) UpdateUserById(ctx context.Context, id string, user *domain.Us
 		Name:     user.FirstName + " " + user.LastName,
 		Email:    user.Email,
 		Address:  user.Address,
+		Sex:      int32(user.Sex),
 		Birthday: user.BirthDay,
-		Password: user.Address,
+		Password: user.Password,
 	})
 	return err
 }

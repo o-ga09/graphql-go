@@ -150,6 +150,17 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 }
 
 func Test_noteDao_CreateNote(t *testing.T) {
+	ctx := context.Background()
+	dbmock, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	res := []*domain.Note{
+		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+	}
+
+	mock.ExpectExec("INSERT INTO notes").WithArgs("1", "title1", "tags1,tags2,tags3", "content1").WillReturnResult(sqlmock.NewResult(1, 1))
+
 	type fields struct {
 		query *db.Queries
 	}
@@ -163,7 +174,7 @@ func Test_noteDao_CreateNote(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{name: "success", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, note: res[0]}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -178,6 +189,17 @@ func Test_noteDao_CreateNote(t *testing.T) {
 }
 
 func Test_noteDao_UpdateNoteByID(t *testing.T) {
+	ctx := context.Background()
+	dbmock, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	res := []*domain.Note{
+		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+	}
+
+	mock.ExpectExec("UPDATE notes").WithArgs("title1", "tags1,tags2,tags3", "content1", "1").WillReturnResult(sqlmock.NewResult(1, 1))
+
 	type fields struct {
 		query *db.Queries
 	}
@@ -192,7 +214,7 @@ func Test_noteDao_UpdateNoteByID(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{name: "success", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, id: "1", note: res[0]}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -207,6 +229,14 @@ func Test_noteDao_UpdateNoteByID(t *testing.T) {
 }
 
 func Test_noteDao_DeleteNoteByID(t *testing.T) {
+	ctx := context.Background()
+	dbmock, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mock.ExpectExec("DELETE FROM notes").WithArgs("1").WillReturnResult(sqlmock.NewResult(1, 1))
+
 	type fields struct {
 		query *db.Queries
 	}
@@ -220,7 +250,7 @@ func Test_noteDao_DeleteNoteByID(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{name: "success", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, id: "1"}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
