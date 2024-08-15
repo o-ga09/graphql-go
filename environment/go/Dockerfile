@@ -1,5 +1,5 @@
 #API用コンテナに含めるバイナリを作成するコンテナ
-FROM golang:1.22-bullseye as deploy-builder
+FROM golang:1.23-bullseye as deploy-builder
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ CMD ["./main"]
 
 #-----------------------------------------------
 #ローカル開発環境で利用するホットリロード環境
-FROM golang:1.22 as dev
+FROM golang:1.23 as dev
 
 WORKDIR /app
 
