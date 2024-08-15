@@ -1,6 +1,6 @@
 module github.com/o-ga09/graphql-go
 
-go 1.21.5
+go 1.23
 
 require (
 	cloud.google.com/go/logging v1.11.0
