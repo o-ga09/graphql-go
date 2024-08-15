@@ -11,6 +11,7 @@ import (
 )
 
 func TestNewUserService(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		userRepo repository.UserRepository
 	}
@@ -23,6 +24,7 @@ func TestNewUserService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := NewUserService(tt.args.userRepo); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewUserService() = %v, want %v", got, tt.want)
 			}
@@ -31,6 +33,7 @@ func TestNewUserService(t *testing.T) {
 }
 
 func TestUserService_FetchUsers(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.User{
 		{ID: "1", FirstName: "firstName1", LastName: "lastName1", Email: "email1", Address: "address1", BirthDay: "birthDay1", Password: "password", Sex: 0},
@@ -59,6 +62,7 @@ func TestUserService_FetchUsers(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &UserService{
 				userRepo: tt.fields.userRepo,
 			}
@@ -75,6 +79,7 @@ func TestUserService_FetchUsers(t *testing.T) {
 }
 
 func TestUserService_FetchUserById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.User{
 		{ID: "1", FirstName: "firstName1", LastName: "lastName1", Email: "email1", Address: "address1", BirthDay: "birthDay1", Password: "password", Sex: 0},
@@ -104,6 +109,7 @@ func TestUserService_FetchUserById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &UserService{
 				userRepo: tt.fields.userRepo,
 			}
@@ -120,6 +126,7 @@ func TestUserService_FetchUserById(t *testing.T) {
 }
 
 func TestUserService_CreateUser(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.User{
 		{ID: "1", FirstName: "firstName1", LastName: "lastName1", Email: "email1", Address: "address1", BirthDay: "birthDay1", Password: "password", Sex: 0},
@@ -152,6 +159,7 @@ func TestUserService_CreateUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &UserService{
 				userRepo: tt.fields.userRepo,
 			}
@@ -168,6 +176,7 @@ func TestUserService_CreateUser(t *testing.T) {
 }
 
 func TestUserService_UpdateUserById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.User{
 		{ID: "1", FirstName: "firstName1", LastName: "lastName1", Email: "email1", Address: "address1", BirthDay: "birthDay1", Password: "password", Sex: 0},
@@ -201,6 +210,7 @@ func TestUserService_UpdateUserById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &UserService{
 				userRepo: tt.fields.userRepo,
 			}
@@ -217,6 +227,7 @@ func TestUserService_UpdateUserById(t *testing.T) {
 }
 
 func TestUserService_DeleteUserById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	mockedUserRepository := &mock.UserRepositoryMock{
 		DeleteUserByIdFunc: func(contextMoqParam context.Context, id string) error {
@@ -240,6 +251,7 @@ func TestUserService_DeleteUserById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &UserService{
 				userRepo: tt.fields.userRepo,
 			}

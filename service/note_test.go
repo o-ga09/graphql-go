@@ -31,6 +31,7 @@ func TestNewNoteService(t *testing.T) {
 }
 
 func TestNoteService_FetchNotes(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.Note{
 		{ID: "1", Title: "title1", Content: "content1"},
@@ -59,6 +60,7 @@ func TestNoteService_FetchNotes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}
@@ -75,6 +77,7 @@ func TestNoteService_FetchNotes(t *testing.T) {
 }
 
 func TestNoteService_FetchNoteById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.Note{
 		{ID: "1", Title: "title1", Content: "content1"},
@@ -104,6 +107,7 @@ func TestNoteService_FetchNoteById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}
@@ -120,6 +124,7 @@ func TestNoteService_FetchNoteById(t *testing.T) {
 }
 
 func TestNoteService_CreateNote(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	mockedNoteRepository := &mock.NoteRepositoryMock{
 		CreateNoteFunc: func(contextMoqParam context.Context, note *domain.Note) error {
@@ -147,6 +152,7 @@ func TestNoteService_CreateNote(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}
@@ -163,6 +169,7 @@ func TestNoteService_CreateNote(t *testing.T) {
 }
 
 func TestNoteService_UpdateNoteById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.Note{
 		{ID: "1", Title: "title1", Content: "content1"},
@@ -196,6 +203,7 @@ func TestNoteService_UpdateNoteById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}
@@ -212,6 +220,7 @@ func TestNoteService_UpdateNoteById(t *testing.T) {
 }
 
 func TestNoteService_DeleteNoteById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	mockedNoteRepository := &mock.NoteRepositoryMock{
 		DeleteNoteByIDFunc: func(contextMoqParam context.Context, id string) error {
@@ -235,6 +244,7 @@ func TestNoteService_DeleteNoteById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}

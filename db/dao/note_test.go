@@ -13,6 +13,7 @@ import (
 )
 
 func TestNewNoteDao(t *testing.T) {
+	t.Parallel()
 	dbmock, _, err := sqlmock.New()
 	if err != nil {
 		t.Fatal(err)
@@ -29,6 +30,7 @@ func TestNewNoteDao(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := NewNoteDao(tt.args.d); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewNoteDao() = %v, want %v", got, tt.want)
 			}
@@ -37,6 +39,7 @@ func TestNewNoteDao(t *testing.T) {
 }
 
 func Test_noteDao_GetNotes(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	res := []*domain.Note{
@@ -77,6 +80,7 @@ func Test_noteDao_GetNotes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &noteDao{
 				query: tt.fields.query,
 			}
@@ -93,6 +97,7 @@ func Test_noteDao_GetNotes(t *testing.T) {
 }
 
 func Test_noteDao_GetNoteByID(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -134,6 +139,7 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &noteDao{
 				query: tt.fields.query,
 			}
@@ -150,6 +156,7 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 }
 
 func Test_noteDao_CreateNote(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -178,6 +185,7 @@ func Test_noteDao_CreateNote(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &noteDao{
 				query: tt.fields.query,
 			}
@@ -189,6 +197,7 @@ func Test_noteDao_CreateNote(t *testing.T) {
 }
 
 func Test_noteDao_UpdateNoteByID(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -218,6 +227,7 @@ func Test_noteDao_UpdateNoteByID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &noteDao{
 				query: tt.fields.query,
 			}
@@ -229,6 +239,7 @@ func Test_noteDao_UpdateNoteByID(t *testing.T) {
 }
 
 func Test_noteDao_DeleteNoteByID(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -254,6 +265,7 @@ func Test_noteDao_DeleteNoteByID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			n := &noteDao{
 				query: tt.fields.query,
 			}

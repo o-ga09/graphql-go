@@ -13,6 +13,7 @@ import (
 )
 
 func TestNewUserDao(t *testing.T) {
+	t.Parallel()
 	dbmock, _, err := sqlmock.New()
 	if err != nil {
 		t.Fatal(err)
@@ -29,6 +30,7 @@ func TestNewUserDao(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := NewUserDao(tt.args.d); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewUserDao() = %v, want %v", got, tt.want)
 			}
@@ -37,6 +39,7 @@ func TestNewUserDao(t *testing.T) {
 }
 
 func Test_userDao_GetUsers(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -81,6 +84,7 @@ func Test_userDao_GetUsers(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &userDao{
 				query: tt.fields.query,
 			}
@@ -97,6 +101,7 @@ func Test_userDao_GetUsers(t *testing.T) {
 }
 
 func Test_userDao_GetUserById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -142,6 +147,7 @@ func Test_userDao_GetUserById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &userDao{
 				query: tt.fields.query,
 			}
@@ -158,6 +164,7 @@ func Test_userDao_GetUserById(t *testing.T) {
 }
 
 func Test_userDao_CreateUser(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -187,6 +194,7 @@ func Test_userDao_CreateUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &userDao{
 				query: tt.fields.query,
 			}
@@ -198,6 +206,7 @@ func Test_userDao_CreateUser(t *testing.T) {
 }
 
 func Test_userDao_UpdateUserById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -248,6 +257,7 @@ func Test_userDao_UpdateUserById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &userDao{
 				query: tt.fields.query,
 			}
@@ -259,6 +269,7 @@ func Test_userDao_UpdateUserById(t *testing.T) {
 }
 
 func Test_userDao_DeleteUserById(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	if err != nil {
@@ -284,6 +295,7 @@ func Test_userDao_DeleteUserById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			u := &userDao{
 				query: tt.fields.query,
 			}
