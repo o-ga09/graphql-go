@@ -2,25 +2,53 @@
 
 package model
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type Mutation struct {
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type NewNote struct {
+	Content string   `json:"content"`
+	Tags    []string `json:"tags"`
+	Title   string   `json:"title"`
+}
+
+type NewUser struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Address   string `json:"address"`
+	Sex       int    `json:"sex"`
+	Password  string `json:"password"`
+	BirthDay  string `json:"birth_day"`
+}
+
+type Note struct {
+	ID              uuid.UUID `json:"id"`
+	Content         string    `json:"content"`
+	Tags            []string  `json:"tags"`
+	Title           string    `json:"title"`
+	User            *User     `json:"user"`
+	CreatedDateTime time.Time `json:"CreatedDateTime"`
+	UpdatedDateTime time.Time `json:"UpdatedDateTime"`
 }
 
 type Query struct {
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
-}
-
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID              uuid.UUID `json:"id"`
+	FirstName       string    `json:"first_name"`
+	LastName        string    `json:"last_name"`
+	Email           string    `json:"email"`
+	Address         string    `json:"address"`
+	Sex             int       `json:"sex"`
+	Password        string    `json:"password"`
+	BirthDay        string    `json:"birth_day"`
+	CreatedDateTime time.Time `json:"CreatedDateTime"`
+	UpdatedDateTime time.Time `json:"UpdatedDateTime"`
 }
