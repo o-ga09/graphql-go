@@ -33,14 +33,32 @@ func (u *UserService) FetchUserById(ctx context.Context, id string) (*domain.Use
 	return user, nil
 }
 
-func (u *UserService) CreateUser(ctx context.Context, user *domain.User) error {
+func (u *UserService) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
 	err := u.userRepo.CreateUser(ctx, user)
-	return err
+	if err != nil {
+		return nil, err
+	}
+	return &domain.User{
+		ID:              user.ID,
+		FirstName:       user.FirstName,
+		LastName:        user.LastName,
+		Email:           user.Email,
+		Address:         user.Address,
+		BirthDay:        user.BirthDay,
+		Password:        user.Password,
+		Sex:             user.Sex,
+		CreatedDateTime: user.CreatedDateTime,
+		UpdatedDateTime: user.UpdatedDateTime,
+	}, err
 }
 
-func (u *UserService) UpdateUserById(ctx context.Context, id string, user *domain.User) error {
+func (u *UserService) UpdateUserById(ctx context.Context, id string, user *domain.User) (*domain.User, error) {
 	err := u.userRepo.UpdateUserById(ctx, id, user)
-	return err
+	if err != nil {
+		return nil, err
+	}
+	updatedUser, err := u.userRepo.GetUserById(ctx, id)
+	return updatedUser, err
 }
 
 func (u *UserService) DeleteUserById(ctx context.Context, id string) error {

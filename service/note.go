@@ -33,14 +33,25 @@ func (n *NoteService) FetchNoteById(ctx context.Context, id string) (*domain.Not
 	return note, nil
 }
 
-func (n *NoteService) CreateNote(ctx context.Context, note *domain.Note) error {
+func (n *NoteService) CreateNote(ctx context.Context, note *domain.Note) (*domain.Note, error) {
 	err := n.noteRepo.CreateNote(ctx, note)
-	return err
+	if err != nil {
+		return nil, err
+	}
+	cretaedNote, err := n.noteRepo.GetNoteByID(ctx, note.ID)
+	if err != nil {
+		return nil, err
+	}
+	return cretaedNote, err
 }
 
-func (n *NoteService) UpdateNoteById(ctx context.Context, id string, note *domain.Note) error {
+func (n *NoteService) UpdateNoteById(ctx context.Context, id string, note *domain.Note) (*domain.Note, error) {
 	err := n.noteRepo.UpdateNoteByID(ctx, id, note)
-	return err
+	if err != nil {
+		return nil, err
+	}
+	updatedNote, err := n.noteRepo.GetNoteByID(ctx, id)
+	return updatedNote, err
 }
 
 func (n *NoteService) DeleteNoteById(ctx context.Context, id string) error {
