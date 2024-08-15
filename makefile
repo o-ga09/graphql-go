@@ -18,6 +18,7 @@ clean:
 	@echo "Cleaning..."
 	@rm -rf db/db
 	@rm -rf graph
+	@rm -f server.go
 	@rm -rf bin/$(APP_NAME)
 
 .PHONY generate:
