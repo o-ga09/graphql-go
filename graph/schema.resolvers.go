@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/o-ga09/graphql-go/graph/model"
@@ -45,47 +44,53 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, input model.NewUser) 
 
 // Notes is the resolver for the notes field.
 func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
-	res := []*model.Note{
-		{
-			ID:      uuid.New(),
-			Content: "Note 1",
-			Title:   "Title 1",
-			Tags:    []string{"tag1", "tag2"},
-			User: &model.User{
-				ID:              uuid.New(),
-				FirstName:       "User 1",
-				LastName:        "User 1",
-				Email:           "hoge@example.com",
-				Address:         "Tokyo",
-				Sex:             0,
-				Password:        "password",
-				BirthDay:        "2000-01-01",
-				CreatedDateTime: time.Now(),
-				UpdatedDateTime: time.Now(),
-			},
-		},
+	note, err := r.NoteService.FetchNotes(ctx)
+	if err != nil {
+		return nil, err
 	}
-
+	res := []*model.Note{}
+	for _, n := range note {
+		id, err := uuid.Parse(n.ID)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, &model.Note{
+			ID:              id,
+			Title:           n.Title,
+			Content:         n.Content,
+			Tags:            n.Tags,
+			CreatedDateTime: n.CreatedDateTime,
+			UpdatedDateTime: n.UpdatedDateTime,
+		})
+	}
 	return res, nil
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	res := []*model.User{
-		{
-			ID:              uuid.New(),
-			FirstName:       "User 1",
-			LastName:        "User 1",
-			Email:           "hoge@example.com",
-			Address:         "Tokyo",
-			Sex:             0,
-			Password:        "password",
-			BirthDay:        "2000-01-01",
-			CreatedDateTime: time.Now(),
-			UpdatedDateTime: time.Now(),
-		},
+	user, err := r.UserService.FetchUsers(ctx)
+	if err != nil {
+		return nil, err
 	}
-
+	res := []*model.User{}
+	for _, u := range user {
+		id, err := uuid.Parse(u.ID)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, &model.User{
+			ID:              id,
+			FirstName:       u.FirstName,
+			LastName:        u.LastName,
+			Email:           u.Email,
+			Address:         u.Address,
+			BirthDay:        u.BirthDay,
+			Password:        u.Password,
+			Sex:             u.Sex,
+			CreatedDateTime: u.CreatedDateTime,
+			UpdatedDateTime: u.UpdatedDateTime,
+		})
+	}
 	return res, nil
 }
 
