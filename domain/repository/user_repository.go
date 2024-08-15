@@ -1,11 +1,15 @@
 package repository
 
-import "github.com/o-ga09/graphql-go/domain"
+import (
+	"context"
+
+	"github.com/o-ga09/graphql-go/domain"
+)
 
 type UserRepository interface {
-	GetUsers() ([]*domain.User, error)
-	GetUserById(id string) (*domain.User, error)
-	CreateUser(user *domain.User) error
-	UpdateUserById(id string, user *domain.User) error
-	DeleteUserById(id string) error
+	GetUsers(context.Context) ([]*domain.User, error)
+	GetUserById(ctx context.Context, id string) (*domain.User, error)
+	CreateUser(ctx context.Context, user *domain.User) error
+	UpdateUserById(ctx context.Context, id string, user *domain.User) error
+	DeleteUserById(ctx context.Context, id string) error
 }

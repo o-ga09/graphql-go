@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"strings"
 	"time"
 
 	"github.com/o-ga09/graphql-go/pkg/date"
@@ -19,7 +20,7 @@ type User struct {
 	UpdatedDateTime time.Time
 }
 
-func NewUser(id, f_name, l_name, email, address, birthday, password, created, updated string, sex int) (*User, error) {
+func NewUser(id, name, email, address, birthday, password, created, updated string, sex int) (*User, error) {
 	createdDateTime, err := date.TimeToString(created)
 	if err != nil {
 		return nil, err
@@ -28,6 +29,7 @@ func NewUser(id, f_name, l_name, email, address, birthday, password, created, up
 	if err != nil {
 		return nil, err
 	}
+	f_name, l_name := splitName(name)
 	return &User{
 		ID:              id,
 		FirstName:       f_name,
@@ -40,4 +42,12 @@ func NewUser(id, f_name, l_name, email, address, birthday, password, created, up
 		CreatedDateTime: createdDateTime,
 		UpdatedDateTime: updatedDateTime,
 	}, nil
+}
+
+func splitName(name string) (string, string) {
+	names := strings.Split(name, " ")
+	if len(names) == 1 {
+		return names[0], ""
+	}
+	return names[0], names[1]
 }
