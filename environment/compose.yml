@@ -16,7 +16,7 @@ services:
       - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./mysql/sql:/docker-entrypoint-initdb.d
   app:
-    container_name: app
+    container_name: note-app
     depends_on:
       - db
     build:
