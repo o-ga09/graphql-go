@@ -7,7 +7,9 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/o-ga09/graphql-go/graph/model"
 )
 
@@ -43,12 +45,48 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, input model.NewUser) 
 
 // Notes is the resolver for the notes field.
 func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
-	panic(fmt.Errorf("not implemented: Notes - notes"))
+	res := []*model.Note{
+		{
+			ID:      uuid.New(),
+			Content: "Note 1",
+			Title:   "Title 1",
+			Tags:    []string{"tag1", "tag2"},
+			User: &model.User{
+				ID:              uuid.New(),
+				FirstName:       "User 1",
+				LastName:        "User 1",
+				Email:           "hoge@example.com",
+				Address:         "Tokyo",
+				Sex:             0,
+				Password:        "password",
+				BirthDay:        "2000-01-01",
+				CreatedDateTime: time.Now(),
+				UpdatedDateTime: time.Now(),
+			},
+		},
+	}
+
+	return res, nil
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
+	res := []*model.User{
+		{
+			ID:              uuid.New(),
+			FirstName:       "User 1",
+			LastName:        "User 1",
+			Email:           "hoge@example.com",
+			Address:         "Tokyo",
+			Sex:             0,
+			Password:        "password",
+			BirthDay:        "2000-01-01",
+			CreatedDateTime: time.Now(),
+			UpdatedDateTime: time.Now(),
+		},
+	}
+
+	return res, nil
 }
 
 // Mutation returns MutationResolver implementation.
