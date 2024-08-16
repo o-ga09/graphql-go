@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/o-ga09/graphql-go/domain"
 	"github.com/o-ga09/graphql-go/graph/model"
+	"github.com/o-ga09/graphql-go/pkg/date"
 )
 
 // CreateNote is the resolver for the createNote field.
@@ -114,8 +115,8 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, input model.DeleteUse
 }
 
 // Notes is the resolver for the notes field.
-func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
-	note, err := r.NoteService.FetchNotes(ctx)
+func (r *queryResolver) Notes(ctx context.Context, input string) ([]*model.Note, error) {
+	note, err := r.NoteService.FetchNotes(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -138,14 +139,22 @@ func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
 		if err != nil {
 			return nil, err
 		}
+		createdAt, err := date.TimeToString(n.CreatedDateTime)
+		if err != nil {
+			return nil, err
+		}
+		updatedAt, err := date.TimeToString(n.UpdatedDateTime)
+		if err != nil {
+			return nil, err
+		}
 		res = append(res, &model.Note{
 			ID:              id,
 			Title:           n.Title,
 			Content:         n.Content,
 			Tags:            n.Tags,
 			User:            user,
-			CreatedDateTime: n.CreatedDateTime,
-			UpdatedDateTime: n.UpdatedDateTime,
+			CreatedDateTime: createdAt,
+			UpdatedDateTime: updatedAt,
 		})
 	}
 	return res, nil
@@ -177,6 +186,52 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 		})
 	}
 	return res, nil
+}
+
+// NoteByID is the resolver for the noteById field.
+func (r *queryResolver) NoteByID(ctx context.Context, input string) (*model.Note, error) {
+	res, err := r.NoteService.FetchNoteById(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := uuid.Parse(res.ID)
+	if err != nil {
+		return nil, err
+	}
+	createdAt, err := date.TimeToString(res.CreatedDateTime)
+	if err != nil {
+		return nil, err
+	}
+	updatedAt, err := date.TimeToString(res.UpdatedDateTime)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Note{
+		ID:              id,
+		Title:           res.Title,
+		Content:         res.Content,
+		Tags:            res.Tags,
+		User:            &model.User{},
+		CreatedDateTime: createdAt,
+		UpdatedDateTime: updatedAt,
+	}, nil
+}
+
+// UserByID is the resolver for the userById field.
+func (r *queryResolver) UserByID(ctx context.Context, input string) (*model.User, error) {
+	return &model.User{
+		ID:              uuid.New(),
+		FirstName:       "firstName",
+		LastName:        "lastName",
+		Email:           "email",
+		Address:         "address",
+		BirthDay:        "birthDay",
+		Password:        "password",
+		Sex:             0,
+		CreatedDateTime: time.Now(),
+		UpdatedDateTime: time.Now(),
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.

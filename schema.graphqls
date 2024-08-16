@@ -28,8 +28,10 @@ type User {
 }
 
 type Query {
-  notes: [Note!]!
+  notes(input: String!): [Note!]!
   users: [User!]!
+  noteById(input: String!): Note!
+  userById(input: String!): User!
 }
 
 input NewNote {
