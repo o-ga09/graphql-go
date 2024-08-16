@@ -5,6 +5,7 @@ import (
 
 	"github.com/o-ga09/graphql-go/domain"
 	"github.com/o-ga09/graphql-go/domain/repository"
+	"github.com/o-ga09/graphql-go/service/dto"
 )
 
 type NoteService struct {
@@ -17,20 +18,43 @@ func NewNoteService(noteRepo repository.NoteRepository) *NoteService {
 	}
 }
 
-func (n *NoteService) FetchNotes(ctx context.Context) ([]*domain.Note, error) {
-	notes, err := n.noteRepo.GetNotes(ctx)
+func (n *NoteService) FetchNotes(ctx context.Context, userId string) ([]*dto.NoteDto, error) {
+	notes, err := n.noteRepo.GetNotes(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
-	return notes, nil
+
+	res := []*dto.NoteDto{}
+	for _, note := range notes {
+		r := &dto.NoteDto{
+			ID:              note.ID,
+			UserId:          note.UserID,
+			Title:           note.Title,
+			Content:         note.Content,
+			Tags:            note.Tags,
+			CreatedDateTime: note.CreatedDateTime.Format("2006-01-02 15:04:05"),
+			UpdatedDateTime: note.UpdatedDateTime.Format("2006-01-02 15:04:05"),
+		}
+		res = append(res, r)
+	}
+	return res, nil
 }
 
-func (n *NoteService) FetchNoteById(ctx context.Context, id string) (*domain.Note, error) {
+func (n *NoteService) FetchNoteById(ctx context.Context, id string) (*dto.NoteDto, error) {
 	note, err := n.noteRepo.GetNoteByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return note, nil
+	res := &dto.NoteDto{
+		ID:              note.ID,
+		UserId:          note.UserID,
+		Title:           note.Title,
+		Content:         note.Content,
+		Tags:            note.Tags,
+		CreatedDateTime: note.CreatedDateTime.Format("2006-01-02 15:04:05"),
+		UpdatedDateTime: note.UpdatedDateTime.Format("2006-01-02 15:04:05"),
+	}
+	return res, nil
 }
 
 func (n *NoteService) CreateNote(ctx context.Context, note *domain.Note) (*domain.Note, error) {

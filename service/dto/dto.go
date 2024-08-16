@@ -5,7 +5,7 @@ type NoteDto struct {
 	Title           string   `json:"title"`
 	Content         string   `json:"content"`
 	Tags            []string `json:"tags"`
-	User            UserDto  `json:"user"`
+	UserId          string   `json:"user"`
 	CreatedDateTime string   `json:"createdDateTime"`
 	UpdatedDateTime string   `json:"updatedDateTime"`
 }

@@ -39,7 +39,7 @@ func TestNoteService_FetchNotes(t *testing.T) {
 		{ID: "3", Title: "title3", Content: "content3"},
 	}
 	mockedNoteRepository := &mock.NoteRepositoryMock{
-		GetNotesFunc: func(contextMoqParam context.Context) ([]*domain.Note, error) {
+		GetNotesFunc: func(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
 			return res, nil
 		},
 	}
@@ -47,7 +47,8 @@ func TestNoteService_FetchNotes(t *testing.T) {
 		noteRepo repository.NoteRepository
 	}
 	type args struct {
-		ctx context.Context
+		ctx    context.Context
+		userId string
 	}
 	tests := []struct {
 		name    string
@@ -56,7 +57,7 @@ func TestNoteService_FetchNotes(t *testing.T) {
 		want    []*domain.Note
 		wantErr bool
 	}{
-		{name: "TestFetchNotes", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx}, want: res, wantErr: false},
+		{name: "TestFetchNotes", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, userId: "1"}, want: res, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -64,7 +65,7 @@ func TestNoteService_FetchNotes(t *testing.T) {
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}
-			got, err := n.FetchNotes(tt.args.ctx)
+			got, err := n.FetchNotes(tt.args.ctx, tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NoteService.FetchNotes() error = %v, wantErr %v", err, tt.wantErr)
 				return
