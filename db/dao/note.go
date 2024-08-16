@@ -20,14 +20,14 @@ func NewNoteDao(d *sql.DB) *noteDao {
 	}
 }
 
-func (n *noteDao) GetNotes(ctx context.Context) ([]*domain.Note, error) {
-	notes, err := n.query.GetNotes(ctx)
+func (n *noteDao) GetNotes(ctx context.Context, userId string) ([]*domain.Note, error) {
+	notes, err := n.query.GetNotes(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
 	res := []*domain.Note{}
 	for _, note := range notes {
-		r, err := domain.NewNote(note.NoteID, note.Title, note.Content, note.Tags, note.CreatedAt.Time.Format("2006-01-02 15:04:05"), note.UpdatedAt.Time.Format("2006-01-02 15:04:05"))
+		r, err := domain.NewNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, note.CreatedAt.Time.Format("2006-01-02 15:04:05"), note.UpdatedAt.Time.Format("2006-01-02 15:04:05"))
 		if err != nil {
 			return nil, err
 		}
@@ -41,7 +41,7 @@ func (n *noteDao) GetNoteByID(ctx context.Context, id string) (*domain.Note, err
 	if err != nil {
 		return nil, err
 	}
-	return domain.NewNote(note.NoteID, note.Title, note.Content, note.Tags, note.CreatedAt.Time.Format("2006-01-02 15:04:05"), note.UpdatedAt.Time.Format("2006-01-02 15:04:05"))
+	return domain.NewNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, note.CreatedAt.Time.Format("2006-01-02 15:04:05"), note.UpdatedAt.Time.Format("2006-01-02 15:04:05"))
 }
 
 func (n *noteDao) CreateNote(ctx context.Context, note *domain.Note) error {

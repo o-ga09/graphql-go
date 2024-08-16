@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log/slog"
 	"os"
 
@@ -17,7 +16,6 @@ func Connect(ctx context.Context) *sql.DB {
 	if err != nil {
 		return nil
 	}
-	fmt.Println("called")
 	slog.Log(ctx, logger.SeverityInfo, "db connected")
 	return db
 }

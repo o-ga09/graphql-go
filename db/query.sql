@@ -1,9 +1,12 @@
 -- name: GetNote :one
 SELECT * FROM notes
-WHERE note_id = ? LIMIT 1;
+JOIN user_notes ON notes.note_id = user_notes.note_id
+WHERE user_notes.note_id = ? LIMIT 1;
 
 -- name: GetNotes :many
 SELECT * FROM notes
+JOIN user_notes ON notes.note_id = user_notes.note_id
+WHERE user_notes.user_id = ?
 ORDER BY created_at DESC;
 
 -- name: CreateNote :execresult

@@ -90,13 +90,26 @@ func (q *Queries) DeleteUser(ctx context.Context, userID string) error {
 }
 
 const getNote = `-- name: GetNote :one
-SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes
-WHERE note_id = ? LIMIT 1
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id, user_notes.note_id FROM notes
+JOIN user_notes ON notes.note_id = user_notes.note_id
+WHERE user_notes.note_id = ? LIMIT 1
 `
 
-func (q *Queries) GetNote(ctx context.Context, noteID string) (Note, error) {
+type GetNoteRow struct {
+	ID        int64
+	NoteID    string
+	Title     string
+	Tags      string
+	Content   string
+	CreatedAt sql.NullTime
+	UpdatedAt sql.NullTime
+	UserID    string
+	NoteID_2  string
+}
+
+func (q *Queries) GetNote(ctx context.Context, noteID string) (GetNoteRow, error) {
 	row := q.db.QueryRowContext(ctx, getNote, noteID)
-	var i Note
+	var i GetNoteRow
 	err := row.Scan(
 		&i.ID,
 		&i.NoteID,
@@ -105,24 +118,40 @@ func (q *Queries) GetNote(ctx context.Context, noteID string) (Note, error) {
 		&i.Content,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserID,
+		&i.NoteID_2,
 	)
 	return i, err
 }
 
 const getNotes = `-- name: GetNotes :many
-SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id, user_notes.note_id FROM notes
+JOIN user_notes ON notes.note_id = user_notes.note_id
+WHERE user_notes.user_id = ?
 ORDER BY created_at DESC
 `
 
-func (q *Queries) GetNotes(ctx context.Context) ([]Note, error) {
-	rows, err := q.db.QueryContext(ctx, getNotes)
+type GetNotesRow struct {
+	ID        int64
+	NoteID    string
+	Title     string
+	Tags      string
+	Content   string
+	CreatedAt sql.NullTime
+	UpdatedAt sql.NullTime
+	UserID    string
+	NoteID_2  string
+}
+
+func (q *Queries) GetNotes(ctx context.Context, userID string) ([]GetNotesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getNotes, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Note
+	var items []GetNotesRow
 	for rows.Next() {
-		var i Note
+		var i GetNotesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.NoteID,
@@ -131,6 +160,8 @@ func (q *Queries) GetNotes(ctx context.Context) ([]Note, error) {
 			&i.Content,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.UserID,
+			&i.NoteID_2,
 		); err != nil {
 			return nil, err
 		}

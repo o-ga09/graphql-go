@@ -67,7 +67,8 @@ func Test_noteDao_GetNotes(t *testing.T) {
 		query *db.Queries
 	}
 	type args struct {
-		ctx context.Context
+		ctx    context.Context
+		userId string
 	}
 	tests := []struct {
 		name    string
@@ -76,7 +77,7 @@ func Test_noteDao_GetNotes(t *testing.T) {
 		want    []*domain.Note
 		wantErr bool
 	}{
-		{name: "success", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx}, want: res},
+		{name: "success", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, userId: "1"}, want: res},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -84,7 +85,7 @@ func Test_noteDao_GetNotes(t *testing.T) {
 			n := &noteDao{
 				query: tt.fields.query,
 			}
-			got, err := n.GetNotes(tt.args.ctx)
+			got, err := n.GetNotes(tt.args.ctx, tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("noteDao.GetNotes() error = %v, wantErr %v", err, tt.wantErr)
 				return
