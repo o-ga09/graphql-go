@@ -1,0 +1,13 @@
+query {
+    users {
+      first_name
+      last_name
+      id
+      birth_day
+      sex
+      address
+      email
+      UpdatedDateTime
+      CreatedDateTime
+    }
+}
