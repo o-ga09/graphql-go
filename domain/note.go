@@ -9,6 +9,7 @@ import (
 
 type Note struct {
 	ID              string
+	UserID          string
 	Content         string
 	Title           string
 	Tags            []string
@@ -16,7 +17,7 @@ type Note struct {
 	UpdatedDateTime time.Time
 }
 
-func NewNote(id, title, content, tags, created, updated string) (*Note, error) {
+func NewNote(id, userId, title, content, tags, created, updated string) (*Note, error) {
 	t := strings.Split(tags, ",")
 	CreatedDateTime, err := date.TimeToString(created)
 	if err != nil {
@@ -28,6 +29,7 @@ func NewNote(id, title, content, tags, created, updated string) (*Note, error) {
 	}
 	return &Note{
 		ID:              id,
+		UserID:          userId,
 		Content:         content,
 		Title:           title,
 		Tags:            t,

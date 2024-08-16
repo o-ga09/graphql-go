@@ -29,7 +29,7 @@ var _ repository.NoteRepository = &NoteRepositoryMock{}
 //			GetNoteByIDFunc: func(ctx context.Context, id string) (*domain.Note, error) {
 //				panic("mock out the GetNoteByID method")
 //			},
-//			GetNotesFunc: func(contextMoqParam context.Context) ([]*domain.Note, error) {
+//			GetNotesFunc: func(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
 //				panic("mock out the GetNotes method")
 //			},
 //			UpdateNoteByIDFunc: func(ctx context.Context, id string, note *domain.Note) error {
@@ -52,7 +52,7 @@ type NoteRepositoryMock struct {
 	GetNoteByIDFunc func(ctx context.Context, id string) (*domain.Note, error)
 
 	// GetNotesFunc mocks the GetNotes method.
-	GetNotesFunc func(contextMoqParam context.Context) ([]*domain.Note, error)
+	GetNotesFunc func(contextMoqParam context.Context, s string) ([]*domain.Note, error)
 
 	// UpdateNoteByIDFunc mocks the UpdateNoteByID method.
 	UpdateNoteByIDFunc func(ctx context.Context, id string, note *domain.Note) error
@@ -84,6 +84,8 @@ type NoteRepositoryMock struct {
 		GetNotes []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
+			// S is the s argument value.
+			S string
 		}
 		// UpdateNoteByID holds details about calls to the UpdateNoteByID method.
 		UpdateNoteByID []struct {
@@ -211,19 +213,21 @@ func (mock *NoteRepositoryMock) GetNoteByIDCalls() []struct {
 }
 
 // GetNotes calls GetNotesFunc.
-func (mock *NoteRepositoryMock) GetNotes(contextMoqParam context.Context) ([]*domain.Note, error) {
+func (mock *NoteRepositoryMock) GetNotes(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
 	if mock.GetNotesFunc == nil {
 		panic("NoteRepositoryMock.GetNotesFunc: method is nil but NoteRepository.GetNotes was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
+		S               string
 	}{
 		ContextMoqParam: contextMoqParam,
+		S:               s,
 	}
 	mock.lockGetNotes.Lock()
 	mock.calls.GetNotes = append(mock.calls.GetNotes, callInfo)
 	mock.lockGetNotes.Unlock()
-	return mock.GetNotesFunc(contextMoqParam)
+	return mock.GetNotesFunc(contextMoqParam, s)
 }
 
 // GetNotesCalls gets all the calls that were made to GetNotes.
@@ -232,9 +236,11 @@ func (mock *NoteRepositoryMock) GetNotes(contextMoqParam context.Context) ([]*do
 //	len(mockedNoteRepository.GetNotesCalls())
 func (mock *NoteRepositoryMock) GetNotesCalls() []struct {
 	ContextMoqParam context.Context
+	S               string
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
+		S               string
 	}
 	mock.lockGetNotes.RLock()
 	calls = mock.calls.GetNotes
