@@ -1,11 +1,11 @@
 # GraphQL を実装する
 
-https://zenn.dev/hsaki/books/golang-graphql
+[Goで学ぶGraphQLサーバーサイド入門](https://zenn.dev/hsaki/books/golang-graphql)
 
 ## 実行
 
 ```
-go run server.go
+$ go run cmd/main.go
 ```
 
 ## テスト
@@ -28,8 +28,6 @@ go test ./...
   - [x] ユーザーの閲覧機能
   - [x] ユーザーの更新機能
   - [x] ユーザーの削除機能
-  - [ ] ユーザーの認証機能
-  - [ ] ユーザーの認可機能
 - [ ] テストを作成
   - [ ] E2Eテストを作成
   - [x] ユニットテストを作成
