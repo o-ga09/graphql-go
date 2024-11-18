@@ -1,10 +1,10 @@
 -- name: GetNote :one
-SELECT * FROM notes
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
 WHERE user_notes.note_id = ? LIMIT 1;
 
 -- name: GetNotes :many
-SELECT * FROM notes
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
 WHERE user_notes.user_id = ?
 ORDER BY created_at DESC;

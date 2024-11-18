@@ -4,10 +4,12 @@ import (
 	"context"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/o-ga09/graphql-go/internal/domain"
 	"github.com/o-ga09/graphql-go/internal/domain/repository"
 	mock "github.com/o-ga09/graphql-go/internal/domain/repository/moq"
+	"github.com/o-ga09/graphql-go/internal/service/dto"
 )
 
 func TestNewNoteService(t *testing.T) {
@@ -34,9 +36,14 @@ func TestNoteService_FetchNotes(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.Note{
-		{ID: "1", Title: "title1", Content: "content1"},
-		{ID: "2", Title: "title2", Content: "content2"},
-		{ID: "3", Title: "title3", Content: "content3"},
+		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
+		{ID: "2", Title: "title2", Content: "content2", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
+		{ID: "3", Title: "title3", Content: "content3", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
+	}
+	expected := []*dto.NoteDto{
+		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserId: "1"},
+		{ID: "2", Title: "title2", Content: "content2", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserId: "1"},
+		{ID: "3", Title: "title3", Content: "content3", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserId: "1"},
 	}
 	mockedNoteRepository := &mock.NoteRepositoryMock{
 		GetNotesFunc: func(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
@@ -54,10 +61,10 @@ func TestNoteService_FetchNotes(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    []*domain.Note
+		want    []*dto.NoteDto
 		wantErr bool
 	}{
-		{name: "TestFetchNotes", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, userId: "1"}, want: res, wantErr: false},
+		{name: "TestFetchNotes", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, userId: "1"}, want: expected, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -81,10 +88,11 @@ func TestNoteService_FetchNoteById(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.Note{
-		{ID: "1", Title: "title1", Content: "content1"},
-		{ID: "2", Title: "title2", Content: "content2"},
-		{ID: "3", Title: "title3", Content: "content3"},
+		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
+		{ID: "2", Title: "title2", Content: "content2", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
+		{ID: "3", Title: "title3", Content: "content3", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
 	}
+	expected := &dto.NoteDto{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserId: "1"}
 	mockedNoteRepository := &mock.NoteRepositoryMock{
 		GetNoteByIDFunc: func(contextMoqParam context.Context, id string) (*domain.Note, error) {
 			return res[0], nil
@@ -101,10 +109,10 @@ func TestNoteService_FetchNoteById(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *domain.Note
+		want    *dto.NoteDto
 		wantErr bool
 	}{
-		{name: "TestFetchNoteById", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, id: "1"}, want: res[0], wantErr: false},
+		{name: "TestFetchNoteById", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, id: "1"}, want: expected, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

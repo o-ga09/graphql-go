@@ -43,10 +43,10 @@ func Test_noteDao_GetNotes(t *testing.T) {
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	res := []*domain.Note{
-		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
 	}
 
-	expected := db.Note{
+	expected := db.GetNotesRow{
 		ID:        1,
 		NoteID:    "1",
 		Title:     "title1",
@@ -54,11 +54,12 @@ func Test_noteDao_GetNotes(t *testing.T) {
 		Content:   "content1",
 		CreatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 		UpdatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		UserID:    "1",
 	}
 
-	rows := sqlmock.NewRows([]string{"id", "note_id", "title", "tags", "content", "created_at", "updated_at"})
-	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time)
-	mock.ExpectQuery("SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes ORDER BY created_at DESC").WillReturnRows(rows)
+	rows := sqlmock.NewRows([]string{"id", "notes.note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
+	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.user_id = \? ORDER BY created_at DESC`).WillReturnRows(rows)
 
 	if err != nil {
 		t.Fatal(err)
@@ -91,6 +92,7 @@ func Test_noteDao_GetNotes(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
+				t.Log(got[0])
 				t.Errorf("noteDao.GetNotes() = %v, want %v", got, tt.want)
 			}
 		})
@@ -105,10 +107,10 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 		t.Fatal(err)
 	}
 	res := []*domain.Note{
-		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
 	}
 
-	expected := db.Note{
+	expected := db.GetNoteRow{
 		ID:        1,
 		NoteID:    "1",
 		Title:     "title1",
@@ -116,11 +118,12 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 		Content:   "content1",
 		CreatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 		UpdatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		UserID:    "1",
 	}
 
-	rows := sqlmock.NewRows([]string{"id", "note_id", "title", "tags", "content", "created_at", "updated_at"})
-	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time)
-	mock.ExpectQuery("SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes WHERE note_id = ?").WithArgs("1").WillReturnRows(rows)
+	rows := sqlmock.NewRows([]string{"id", "note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
+	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? LIMIT 1`).WithArgs("1").WillReturnRows(rows)
 
 	type fields struct {
 		query *db.Queries

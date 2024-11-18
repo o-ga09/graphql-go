@@ -90,7 +90,7 @@ func (q *Queries) DeleteUser(ctx context.Context, userID string) error {
 }
 
 const getNote = `-- name: GetNote :one
-SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id, user_notes.note_id FROM notes
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
 WHERE user_notes.note_id = ? LIMIT 1
 `
@@ -104,7 +104,6 @@ type GetNoteRow struct {
 	CreatedAt sql.NullTime
 	UpdatedAt sql.NullTime
 	UserID    string
-	NoteID_2  string
 }
 
 func (q *Queries) GetNote(ctx context.Context, noteID string) (GetNoteRow, error) {
@@ -119,13 +118,12 @@ func (q *Queries) GetNote(ctx context.Context, noteID string) (GetNoteRow, error
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
-		&i.NoteID_2,
 	)
 	return i, err
 }
 
 const getNotes = `-- name: GetNotes :many
-SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id, user_notes.note_id FROM notes
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
 WHERE user_notes.user_id = ?
 ORDER BY created_at DESC
@@ -140,7 +138,6 @@ type GetNotesRow struct {
 	CreatedAt sql.NullTime
 	UpdatedAt sql.NullTime
 	UserID    string
-	NoteID_2  string
 }
 
 func (q *Queries) GetNotes(ctx context.Context, userID string) ([]GetNotesRow, error) {
@@ -161,7 +158,6 @@ func (q *Queries) GetNotes(ctx context.Context, userID string) ([]GetNotesRow, e
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.UserID,
-			&i.NoteID_2,
 		); err != nil {
 			return nil, err
 		}
