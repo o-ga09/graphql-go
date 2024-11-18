@@ -24,6 +24,6 @@ clean:
 .PHONY generate:
 generate:
 	@echo "Generating..."
-	@sqlc -f db/sqlc.yml generate
+	@sqlc -f internal/db/sqlc.yml generate
 	@gqlgen generate
 	@go generate ./...

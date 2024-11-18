@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/o-ga09/graphql-go/domain"
+	"github.com/o-ga09/graphql-go/internal/domain"
 )
 
 //go:generate moq -out moq/user_repository_mock.go -pkg mock . UserRepository

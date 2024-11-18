@@ -1,0 +1,13 @@
+mutation {
+  createUser(input: {
+    first_name: "aaa",
+    last_name: "bbb",
+    email: "hige@example.com",
+    address: "tokyo",
+    sex: 0,
+    password: "234324!",
+    birth_day: "2024-01-01",
+  }){
+    id
+  }
+}

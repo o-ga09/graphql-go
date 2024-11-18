@@ -20,8 +20,8 @@ services:
     depends_on:
       - db
     build:
-      context: ../
-      dockerfile: environment/go/Dockerfile
+      context: .
+      dockerfile: Dockerfile
       target: dev
     environment:
       ENV: DEV

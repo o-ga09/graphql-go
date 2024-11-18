@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/o-ga09/graphql-go/db/db"
-	"github.com/o-ga09/graphql-go/domain"
+	"github.com/o-ga09/graphql-go/internal/db/db"
+	"github.com/o-ga09/graphql-go/internal/domain"
 )
 
 type noteDao struct {

@@ -11,11 +11,11 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/o-ga09/graphql-go/db"
-	"github.com/o-ga09/graphql-go/db/dao"
-	"github.com/o-ga09/graphql-go/graph"
+	"github.com/o-ga09/graphql-go/internal/db"
+	"github.com/o-ga09/graphql-go/internal/db/dao"
+	"github.com/o-ga09/graphql-go/internal/graph"
+	"github.com/o-ga09/graphql-go/internal/service"
 	"github.com/o-ga09/graphql-go/pkg/logger"
-	"github.com/o-ga09/graphql-go/service"
 )
 
 const defaultPort = "8080"

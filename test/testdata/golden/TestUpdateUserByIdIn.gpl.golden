@@ -1,0 +1,14 @@
+mutation {
+  updateUser(input: {
+    id: "d4a6e9b6-f079-45c9-b6d0-565cf4280596",
+    first_name: "aaa",
+    last_name: "bbb",
+    email: "hige@example.com",
+    address: "tokyo",
+    sex: 0,
+    password: "234324!",
+    birth_day: "2024-01-01",
+  }){
+    id
+  }
+}

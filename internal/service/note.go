@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/o-ga09/graphql-go/domain"
-	"github.com/o-ga09/graphql-go/domain/repository"
-	"github.com/o-ga09/graphql-go/service/dto"
+	"github.com/o-ga09/graphql-go/internal/domain"
+	"github.com/o-ga09/graphql-go/internal/domain/repository"
+	"github.com/o-ga09/graphql-go/internal/service/dto"
 )
 
 type NoteService struct {

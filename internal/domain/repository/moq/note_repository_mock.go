@@ -5,8 +5,8 @@ package mock
 
 import (
 	"context"
-	"github.com/o-ga09/graphql-go/domain"
-	"github.com/o-ga09/graphql-go/domain/repository"
+	"github.com/o-ga09/graphql-go/internal/domain"
+	"github.com/o-ga09/graphql-go/internal/domain/repository"
 	"sync"
 )
 

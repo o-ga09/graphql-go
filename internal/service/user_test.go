@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/o-ga09/graphql-go/domain"
-	"github.com/o-ga09/graphql-go/domain/repository"
-	mock "github.com/o-ga09/graphql-go/domain/repository/moq"
+	"github.com/o-ga09/graphql-go/internal/domain"
+	"github.com/o-ga09/graphql-go/internal/domain/repository"
+	mock "github.com/o-ga09/graphql-go/internal/domain/repository/moq"
 )
 
 func TestNewUserService(t *testing.T) {

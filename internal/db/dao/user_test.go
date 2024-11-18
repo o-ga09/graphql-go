@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/o-ga09/graphql-go/db/db"
-	"github.com/o-ga09/graphql-go/domain"
+	"github.com/o-ga09/graphql-go/internal/db/db"
+	"github.com/o-ga09/graphql-go/internal/domain"
 )
 
 func TestNewUserDao(t *testing.T) {
