@@ -5,6 +5,7 @@ package graph
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -510,110 +511,19 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
+//go:embed "schema.graphql"
+var sourcesFS embed.FS
+
+func sourceData(filename string) string {
+	data, err := sourcesFS.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("codegen problem: %s not available", filename))
+	}
+	return string(data)
+}
+
 var sources = []*ast.Source{
-	{Name: "../schema.graphql", Input: `# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-scalar DateTime
-scalar UUID
-
-type Note {
-  id: UUID!
-  content: String!
-  tags: [String!]!
-  title: String!
-  user: User!
-  CreatedDateTime: DateTime!
-  UpdatedDateTime: DateTime!
-}
-
-type User {
-  id: UUID!
-  first_name: String!
-  last_name: String!
-  email: String!
-  address: String!
-  sex: Int!
-  password: String!
-  birth_day: String!
-  CreatedDateTime: DateTime!
-  UpdatedDateTime: DateTime!
-}
-
-type Query {
-  notes(input: String!): [Note!]!
-  users: [User!]!
-  noteById(input: String!): Note!
-  userById(input: String!): User!
-}
-
-input NewNote {
-  content: String!
-  tags: [String!]!
-  title: String!
-}
-
-input UpdateNote {
-  id: ID!
-  content: String
-  tags: [String]
-  title: String
-}
-
-input DeleteNote {
-  id: ID!
-}
-
-input NewUser {
-  first_name: String!
-  last_name: String!
-  email: String!
-  address: String!
-  sex: Int!
-  password: String!
-  birth_day: String!
-}
-
-input UpdateUser {
-  id: ID!
-  first_name: String
-  last_name: String
-  email: String
-  address: String
-  sex: Int
-  password: String
-  birth_day: String
-}
-
-input DeleteUser {
-  id: ID!
-}
-
-type EditedNote {
-  id: ID!
-}
-
-type DeletedNote {
-  id: ID!
-}
-
-type EditedUser {
-  id: ID!
-}
-
-type DeletedUser {
-  id: ID!
-}
-
-type Mutation {
-  createNote(input: NewNote!): EditedNote!
-  updateNote(input: UpdateNote!): EditedNote!
-  deleteNote(input: DeleteNote!): DeletedNote!
-  createUser(input: NewUser!): EditedUser!
-  updateUser(input: UpdateUser!): EditedUser!
-  deleteUser(input: DeleteUser!): DeletedUser!
-}
-`, BuiltIn: false},
+	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
