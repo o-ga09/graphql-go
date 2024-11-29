@@ -1,12 +1,13 @@
 name: Deploy
 on:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
     tags:
       - "v*"
     paths:
       - "**.go"
+  workflow_dispatch:
 
 env:
   SERVICE_NAME: note-app
