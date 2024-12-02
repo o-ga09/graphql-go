@@ -6,8 +6,6 @@ on:
       - main
     tags:
       - "v*"
-    paths:
-      - "**.go"
 
 env:
   SERVICE_NAME: go-note-app
