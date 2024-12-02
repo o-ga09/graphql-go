@@ -1,11 +1,7 @@
 name: lint and test
 on:
   push:
-    paths:
-      - "**.go"
   pull_request:
-    paths:
-      - "**.go"
 
 jobs:
   lint:
