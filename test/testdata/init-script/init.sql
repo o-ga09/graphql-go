@@ -32,6 +32,7 @@ CREATE TABLE user_notes (
 INSERT INTO users (user_id, username, displayname) VALUES ('1', 'admin', 'admin');
 INSERT INTO users (user_id, username, displayname) VALUES ('2', 'user', 'user');
 INSERT INTO users (user_id, username, displayname) VALUES ('3', 'user3', 'user3');
+INSERT INTO users (user_id, username, displayname) VALUES ('4', 'user4', 'user4');
 INSERT INTO notes (note_id, title, tags, content) VALUES ('1', 'First Note', 'first,note', 'This is the first note');
 INSERT INTO notes (note_id, title, tags, content) VALUES ('2', 'Second Note', 'second,note', 'This is the second note');
 INSERT INTO notes (note_id, title, tags, content) VALUES ('3', 'Third Note', 'third,note', 'This is the third note');
