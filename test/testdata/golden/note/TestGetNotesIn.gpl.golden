@@ -1,0 +1,15 @@
+{
+  getNotes(userId: "1") {
+    count
+    notes {
+      noteId
+      title
+      content
+    }
+    author {
+      userId
+      username
+      displayname
+    }
+  }
+}

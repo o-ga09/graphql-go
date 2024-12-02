@@ -1,0 +1,7 @@
+query {
+	getUser(id: "1") {
+		userId
+		username
+		displayname
+  	}
+}

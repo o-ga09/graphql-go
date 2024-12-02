@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/o-ga09/graphql-go/internal/db/db"
 	"github.com/o-ga09/graphql-go/internal/domain"
@@ -26,7 +27,9 @@ func (u *userDao) GetUsers(ctx context.Context) ([]*domain.User, error) {
 	}
 	res := []*domain.User{}
 	for _, user := range users {
-		r, err := domain.NewUser(user.UserID, user.Name, user.Email, user.Address, user.Birthday, user.Password, user.CreatedAt.Time.Format("2006-01-02 15:04:05"), user.UpdatedAt.Time.Format("2006-01-02 15:04:05"), int(user.Sex))
+		createdDateTime := strings.Replace(user.CreatedAt.Time.String(), " +0000 UTC", "", 1)
+		updatedDateTime := strings.Replace(user.UpdatedAt.Time.String(), " +0000 UTC", "", 1)
+		r, err := domain.ReconstractUser(user.UserID, user.Username, user.Displayname, createdDateTime, updatedDateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -35,41 +38,41 @@ func (u *userDao) GetUsers(ctx context.Context) ([]*domain.User, error) {
 	return res, nil
 }
 
-func (u *userDao) GetUserById(ctx context.Context, id string) (*domain.User, error) {
+func (u *userDao) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
 	user, err := u.query.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return domain.NewUser(user.UserID, user.Name, user.Email, user.Address, user.Birthday, user.Password, user.CreatedAt.Time.Format("2006-01-02 15:04:05"), user.UpdatedAt.Time.Format("2006-01-02 15:04:05"), int(user.Sex))
+	createdDateTime := strings.Replace(user.CreatedAt.Time.String(), " +0000 UTC", "", 1)
+	updatedDateTime := strings.Replace(user.UpdatedAt.Time.String(), " +0000 UTC", "", 1)
+	return domain.ReconstractUser(user.UserID, user.Username, user.Displayname, createdDateTime, updatedDateTime)
 }
 
-func (u *userDao) CreateUser(ctx context.Context, user *domain.User) error {
-	_, err := u.query.CreateUser(ctx, db.CreateUserParams{
-		UserID:   user.ID,
-		Name:     user.FirstName + " " + user.LastName,
-		Email:    user.Email,
-		Address:  user.Address,
-		Birthday: user.BirthDay,
-		Password: user.Password,
-		Sex:      int32(user.Sex),
-	})
-	return err
+func (u *userDao) Save(ctx context.Context, user *domain.User) error {
+	record, _ := u.query.GetUser(ctx, user.ID)
+	if record.UserID != user.ID {
+		_, err := u.query.CreateUser(ctx, db.CreateUserParams{
+			UserID:      user.ID,
+			Username:    user.UserName,
+			Displayname: user.DisplayName,
+		})
+		if err != nil {
+			return err
+		}
+	} else {
+		err := u.query.UpdateUser(ctx, db.UpdateUserParams{
+			UserID:      user.ID,
+			Username:    user.UserName,
+			Displayname: user.DisplayName,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (u *userDao) UpdateUserById(ctx context.Context, id string, user *domain.User) error {
-	err := u.query.UpdateUser(ctx, db.UpdateUserParams{
-		UserID:   user.ID,
-		Name:     user.FirstName + " " + user.LastName,
-		Email:    user.Email,
-		Address:  user.Address,
-		Sex:      int32(user.Sex),
-		Birthday: user.BirthDay,
-		Password: user.Password,
-	})
-	return err
-}
-
-func (u *userDao) DeleteUserById(ctx context.Context, id string) error {
+func (u *userDao) Delete(ctx context.Context, id string) error {
 	err := u.query.DeleteUser(ctx, id)
 	return err
 }

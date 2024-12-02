@@ -4,7 +4,6 @@ import (
 	"context"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/o-ga09/graphql-go/internal/domain"
 	"github.com/o-ga09/graphql-go/internal/domain/repository"
@@ -36,9 +35,9 @@ func TestNoteService_FetchNotes(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.Note{
-		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
-		{ID: "2", Title: "title2", Content: "content2", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
-		{ID: "3", Title: "title3", Content: "content3", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
+		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserID: "1"},
+		{ID: "2", Title: "title2", Content: "content2", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserID: "1"},
+		{ID: "3", Title: "title3", Content: "content3", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserID: "1"},
 	}
 	expected := []*dto.NoteDto{
 		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserId: "1"},
@@ -88,9 +87,9 @@ func TestNoteService_FetchNoteById(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.Note{
-		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
-		{ID: "2", Title: "title2", Content: "content2", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
-		{ID: "3", Title: "title3", Content: "content3", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UserID: "1"},
+		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserID: "1"},
+		{ID: "2", Title: "title2", Content: "content2", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserID: "1"},
+		{ID: "3", Title: "title3", Content: "content3", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserID: "1"},
 	}
 	expected := &dto.NoteDto{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserId: "1"}
 	mockedNoteRepository := &mock.NoteRepositoryMock{
@@ -132,16 +131,25 @@ func TestNoteService_FetchNoteById(t *testing.T) {
 	}
 }
 
-func TestNoteService_CreateNote(t *testing.T) {
+func TestNoteService_Save_Create(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	mockedNoteRepository := &mock.NoteRepositoryMock{
-		CreateNoteFunc: func(contextMoqParam context.Context, note *domain.Note) error {
+		SaveFunc: func(ctx context.Context, note *domain.Note) error {
 			return nil
 		},
 		GetNoteByIDFunc: func(contextMoqParam context.Context, id string) (*domain.Note, error) {
-			return &domain.Note{ID: "1", Title: "title1", Content: "content1"}, nil
+			return &domain.Note{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tag1", "tag2", "tag3"}, UserID: "user", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"}, nil
 		},
+	}
+	expected := &dto.NoteDto{
+		ID:              "1",
+		Title:           "title1",
+		Content:         "content1",
+		Tags:            []string{"tag1", "tag2", "tag3"},
+		UserId:          "user",
+		CreatedDateTime: "2024-08-15 00:00:00",
+		UpdatedDateTime: "2024-08-15 00:00:00",
 	}
 	type fields struct {
 		noteRepo repository.NoteRepository
@@ -154,10 +162,10 @@ func TestNoteService_CreateNote(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *domain.Note
+		want    *dto.NoteDto
 		wantErr bool
 	}{
-		{name: "TestCreateNote", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, note: &domain.Note{ID: "1", Title: "title1", Content: "content1"}}, want: &domain.Note{ID: "1", Title: "title1", Content: "content1"}, wantErr: false},
+		{name: "TestCreateNote", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, note: &domain.Note{ID: "1", Title: "title1", Content: "content1"}}, want: expected, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -165,19 +173,20 @@ func TestNoteService_CreateNote(t *testing.T) {
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}
-			got, err := n.CreateNote(tt.args.ctx, tt.args.note)
+			createdNote, err := n.CreateNote(tt.args.ctx, tt.args.note)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NoteService.CreateNote() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NoteService.CreateNote() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(createdNote, tt.want) {
+				t.Errorf("NoteService.CreateNote() = %v, want %v", createdNote, tt.want)
 			}
+
 		})
 	}
 }
 
-func TestNoteService_UpdateNoteById(t *testing.T) {
+func TestNoteService_Save_Update(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.Note{
@@ -185,8 +194,20 @@ func TestNoteService_UpdateNoteById(t *testing.T) {
 		{ID: "2", Title: "title2", Content: "content2"},
 		{ID: "3", Title: "title3", Content: "content3"},
 	}
+	arg := &dto.NoteRequestDto{
+		ID:      "1",
+		Title:   "title1",
+		Content: "content1",
+		Tags:    []string{"tag1", "tag2", "tag3"},
+	}
+	expected := &dto.NoteDto{
+		ID:      "1",
+		Title:   "title1",
+		Content: "content1",
+		Tags:    []string{"tag1", "tag2", "tag3"},
+	}
 	mockedNoteRepository := &mock.NoteRepositoryMock{
-		UpdateNoteByIDFunc: func(contextMoqParam context.Context, id string, note *domain.Note) error {
+		SaveFunc: func(ctx context.Context, note *domain.Note) error {
 			return nil
 		},
 		GetNoteByIDFunc: func(contextMoqParam context.Context, id string) (*domain.Note, error) {
@@ -199,16 +220,16 @@ func TestNoteService_UpdateNoteById(t *testing.T) {
 	type args struct {
 		ctx  context.Context
 		id   string
-		note *domain.Note
+		note *dto.NoteRequestDto
 	}
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		want    *domain.Note
+		want    *dto.NoteDto
 		wantErr bool
 	}{
-		{name: "TestUpdateNoteById", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, id: "1", note: &domain.Note{ID: "1", Title: "title1", Content: "content1"}}, want: &domain.Note{ID: "1", Title: "title1", Content: "content1"}, wantErr: false},
+		{name: "TestUpdateNoteById", fields: fields{noteRepo: mockedNoteRepository}, args: args{ctx: ctx, id: "1", note: arg}, want: expected, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -216,23 +237,23 @@ func TestNoteService_UpdateNoteById(t *testing.T) {
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}
-			got, err := n.UpdateNoteById(tt.args.ctx, tt.args.id, tt.args.note)
+			updatedNote, err := n.UpdateNoteById(tt.args.ctx, tt.args.note)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NoteService.UpdateNoteById() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NoteService.UpdateNoteById() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(updatedNote, tt.want) {
+				t.Errorf("NoteService.UpdateNoteById() = %v, want %v", updatedNote, tt.want)
 			}
 		})
 	}
 }
 
-func TestNoteService_DeleteNoteById(t *testing.T) {
+func TestNoteService_Delete(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	mockedNoteRepository := &mock.NoteRepositoryMock{
-		DeleteNoteByIDFunc: func(contextMoqParam context.Context, id string) error {
+		DeleteFunc: func(ctx context.Context, id string) error {
 			return nil
 		},
 	}

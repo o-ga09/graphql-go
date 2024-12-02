@@ -2,101 +2,56 @@
 #
 # https://gqlgen.com/getting-started/
 scalar DateTime
-scalar UUID
+
+type PostTag {
+  name: String!
+}
 
 type Note {
-  id: UUID!
-  content: String!
-  tags: [String!]!
+  noteId: ID!
   title: String!
-  user: User!
-  CreatedDateTime: DateTime!
-  UpdatedDateTime: DateTime!
+  content: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  tags: [PostTag!]!
+}
+
+type Notes {
+  count: Int!
+  notes: [Note!]!
+  author: User!
+}
+
+type NoteByAuthor {
+  note: Note!
+  author: User!
 }
 
 type User {
-  id: UUID!
-  first_name: String!
-  last_name: String!
-  email: String!
-  address: String!
-  sex: Int!
-  password: String!
-  birth_day: String!
-  CreatedDateTime: DateTime!
-  UpdatedDateTime: DateTime!
+  userId: ID!
+  username: String!
+  displayname: String!
 }
 
 type Query {
-  notes(input: String!): [Note!]!
-  users: [User!]!
-  noteById(input: String!): Note!
-  userById(input: String!): User!
-}
+  getUser(id: ID!): User
+  getUsers: [User]
 
-input NewNote {
-  content: String!
-  tags: [String!]!
-  title: String!
-}
-
-input UpdateNote {
-  id: ID!
-  content: String
-  tags: [String]
-  title: String
-}
-
-input DeleteNote {
-  id: ID!
-}
-
-input NewUser {
-  first_name: String!
-  last_name: String!
-  email: String!
-  address: String!
-  sex: Int!
-  password: String!
-  birth_day: String!
-}
-
-input UpdateUser {
-  id: ID!
-  first_name: String
-  last_name: String
-  email: String
-  address: String
-  sex: Int
-  password: String
-  birth_day: String
-}
-
-input DeleteUser {
-  id: ID!
-}
-
-type EditedNote {
-  id: ID!
-}
-
-type DeletedNote {
-  id: ID!
-}
-
-type EditedUser {
-  id: ID!
-}
-
-type DeletedUser {
-  id: ID!
+  getNotes(userId: ID!): Notes
+  getNoteById(id: ID!): NoteByAuthor
 }
 
 type Mutation {
-  createNote(input: NewNote!): EditedNote!
-  updateNote(input: UpdateNote!): EditedNote!
-  deleteNote(input: DeleteNote!): DeletedNote!
-  createUser(input: NewUser!): EditedUser!
-  updateUser(input: UpdateUser!): EditedUser!
-  deleteUser(input: DeleteUser!): DeletedUser!
+  createUser(userId: String!, username: String!, displayname: String!): User
+  updateUser(userId: ID!, username: String!, displayname: String): User
+  deleteUser(userId: ID!): String
+
+  createNote(
+    userId: String!
+    title: String!
+    content: String!
+    tags: [String!]!
+  ): Note
+  updateNote(noteId: ID!, title: String, content: String, tags: [String!]): Note
+  deleteNote(noteId: ID!): String
 }

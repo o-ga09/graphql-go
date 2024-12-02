@@ -1,0 +1,14 @@
+{
+  getNoteById(id: "1") {
+    note {
+      noteId
+      title
+      content
+    }
+    author {
+      userId
+      username
+      displayname
+    }
+  }
+}

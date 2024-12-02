@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"log"
 	"strings"
 
 	"github.com/o-ga09/graphql-go/internal/db/db"
@@ -27,46 +28,63 @@ func (n *noteDao) GetNotes(ctx context.Context, userId string) ([]*domain.Note, 
 	}
 	res := []*domain.Note{}
 	for _, note := range notes {
-		r, err := domain.NewNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, note.CreatedAt.Time.Format("2006-01-02 15:04:05"), note.UpdatedAt.Time.Format("2006-01-02 15:04:05"))
+		createdDateTime := strings.Replace(note.CreatedAt.Time.String(), " +0000 UTC", "", 1)
+		updatedDateTime := strings.Replace(note.UpdatedAt.Time.String(), " +0000 UTC", "", 1)
+		log.Println(createdDateTime)
+		r, err := domain.ReConstractNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, createdDateTime, updatedDateTime)
 		if err != nil {
 			return nil, err
 		}
 		res = append(res, r)
 	}
+	log.Println(res[0].CreatedDateTime)
 	return res, nil
 }
 
 func (n *noteDao) GetNoteByID(ctx context.Context, id string) (*domain.Note, error) {
-	note, err := n.query.GetNote(ctx, id)
-	if err != nil {
-		return nil, err
+	note, _ := n.query.GetNote(ctx, id)
+	createdDateTime := strings.Replace(note.CreatedAt.Time.String(), " +0000 UTC", "", 1)
+	updatedDateTime := strings.Replace(note.UpdatedAt.Time.String(), " +0000 UTC", "", 1)
+	return domain.ReConstractNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, createdDateTime, updatedDateTime)
+}
+
+func (n *noteDao) Save(ctx context.Context, note *domain.Note) error {
+	record, _ := n.query.GetNote(ctx, note.ID)
+	if record.NoteID != note.ID {
+		_, err := n.query.CreateNote(ctx, db.CreateNoteParams{
+			NoteID:  note.ID,
+			Title:   note.Title,
+			Content: note.Content,
+			Tags:    strings.Join(note.Tags, ","),
+		})
+		if err != nil {
+			return err
+		}
+
+		if err := n.query.CreateUserNote(ctx, db.CreateUserNoteParams{
+			UserID: note.UserID,
+			NoteID: note.ID,
+		}); err != nil {
+			return err
+		}
+	} else {
+		err := n.query.UpdateNote(ctx, db.UpdateNoteParams{
+			NoteID:  note.ID,
+			Title:   note.Title,
+			Tags:    strings.Join(note.Tags, ","),
+			Content: note.Content,
+		})
+		if err != nil {
+			return err
+		}
 	}
-	return domain.NewNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, note.CreatedAt.Time.Format("2006-01-02 15:04:05"), note.UpdatedAt.Time.Format("2006-01-02 15:04:05"))
+	return nil
 }
 
-func (n *noteDao) CreateNote(ctx context.Context, note *domain.Note) error {
-	tags := strings.Join(note.Tags, ",")
-	_, err := n.query.CreateNote(ctx, db.CreateNoteParams{
-		NoteID:  note.ID,
-		Title:   note.Title,
-		Tags:    tags,
-		Content: note.Content,
-	})
-	return err
-}
-
-func (n *noteDao) UpdateNoteByID(ctx context.Context, id string, note *domain.Note) error {
-	tags := strings.Join(note.Tags, ",")
-	err := n.query.UpdateNote(ctx, db.UpdateNoteParams{
-		NoteID:  id,
-		Title:   note.Title,
-		Tags:    tags,
-		Content: note.Content,
-	})
-	return err
-}
-
-func (n *noteDao) DeleteNoteByID(ctx context.Context, id string) error {
+func (n *noteDao) Delete(ctx context.Context, id string) error {
 	err := n.query.DeleteNote(ctx, id)
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }

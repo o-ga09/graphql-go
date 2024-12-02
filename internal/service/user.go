@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"strings"
+	"time"
 
 	"github.com/o-ga09/graphql-go/internal/domain"
 	"github.com/o-ga09/graphql-go/internal/domain/repository"
+	"github.com/o-ga09/graphql-go/internal/service/dto"
 )
 
 type UserService struct {
@@ -17,51 +20,68 @@ func NewUserService(userRepo repository.UserRepository) *UserService {
 	}
 }
 
-func (u *UserService) FetchUsers(ctx context.Context) ([]*domain.User, error) {
+func (u *UserService) FetchUsers(ctx context.Context) ([]*dto.UserDto, error) {
 	users, err := u.userRepo.GetUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return users, nil
+
+	res := []*dto.UserDto{}
+	for _, user := range users {
+		r := &dto.UserDto{
+			ID:              user.ID,
+			UserName:        user.UserName,
+			DisplayName:     user.DisplayName,
+			CreatedDateTime: user.CreatedDateTime,
+			UpdatedDateTime: user.UpdatedDateTime,
+		}
+		res = append(res, r)
+	}
+	return res, nil
 }
 
-func (u *UserService) FetchUserById(ctx context.Context, id string) (*domain.User, error) {
-	user, err := u.userRepo.GetUserById(ctx, id)
+func (u *UserService) FetchUserById(ctx context.Context, id string) (*dto.UserDto, error) {
+	user, err := u.userRepo.GetUserByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
-}
 
-func (u *UserService) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
-	err := u.userRepo.CreateUser(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-	return &domain.User{
+	return &dto.UserDto{
 		ID:              user.ID,
-		FirstName:       user.FirstName,
-		LastName:        user.LastName,
-		Email:           user.Email,
-		Address:         user.Address,
-		BirthDay:        user.BirthDay,
-		Password:        user.Password,
-		Sex:             user.Sex,
+		UserName:        user.UserName,
+		DisplayName:     user.DisplayName,
 		CreatedDateTime: user.CreatedDateTime,
 		UpdatedDateTime: user.UpdatedDateTime,
-	}, err
+	}, nil
 }
 
-func (u *UserService) UpdateUserById(ctx context.Context, id string, user *domain.User) (*domain.User, error) {
-	err := u.userRepo.UpdateUserById(ctx, id, user)
+func (u *UserService) CreateUser(ctx context.Context, user *dto.UserReqsutDto) error {
+	createdDateTime := strings.Replace(time.Now().String(), " +0000 UTC", "", 1)
+	updatedDateTime := strings.Replace(time.Now().String(), " +0000 UTC", "", 1)
+	createdUser, err := domain.NewUser(user.UserId, user.UserName, user.DisplayName, createdDateTime, updatedDateTime)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	updatedUser, err := u.userRepo.GetUserById(ctx, id)
-	return updatedUser, err
+	if err := u.userRepo.Save(ctx, createdUser); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *UserService) UpdateUserById(ctx context.Context, user *dto.UserReqsutDto) error {
+	createdDateTime := strings.Replace(time.Now().String(), " +0000 UTC", "", 1)
+	updatedDateTime := strings.Replace(time.Now().String(), " +0000 UTC", "", 1)
+
+	updateUser, err := domain.NewUser(user.UserId, user.UserName, user.DisplayName, createdDateTime, updatedDateTime)
+	if err != nil {
+		return err
+	}
+	if err := u.userRepo.Save(ctx, updateUser); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *UserService) DeleteUserById(ctx context.Context, id string) error {
-	err := u.userRepo.DeleteUserById(ctx, id)
-	return err
+	return u.userRepo.Delete(ctx, id)
 }

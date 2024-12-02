@@ -20,20 +20,17 @@ var _ repository.UserRepository = &UserRepositoryMock{}
 //
 //		// make and configure a mocked repository.UserRepository
 //		mockedUserRepository := &UserRepositoryMock{
-//			CreateUserFunc: func(ctx context.Context, user *domain.User) error {
-//				panic("mock out the CreateUser method")
+//			DeleteFunc: func(ctx context.Context, id string) error {
+//				panic("mock out the Delete method")
 //			},
-//			DeleteUserByIdFunc: func(ctx context.Context, id string) error {
-//				panic("mock out the DeleteUserById method")
+//			GetUserByIDFunc: func(ctx context.Context, id string) (*domain.User, error) {
+//				panic("mock out the GetUserByID method")
 //			},
-//			GetUserByIdFunc: func(ctx context.Context, id string) (*domain.User, error) {
-//				panic("mock out the GetUserById method")
-//			},
-//			GetUsersFunc: func(contextMoqParam context.Context) ([]*domain.User, error) {
+//			GetUsersFunc: func(ctx context.Context) ([]*domain.User, error) {
 //				panic("mock out the GetUsers method")
 //			},
-//			UpdateUserByIdFunc: func(ctx context.Context, id string, user *domain.User) error {
-//				panic("mock out the UpdateUserById method")
+//			SaveFunc: func(ctx context.Context, user *domain.User) error {
+//				panic("mock out the Save method")
 //			},
 //		}
 //
@@ -42,39 +39,29 @@ var _ repository.UserRepository = &UserRepositoryMock{}
 //
 //	}
 type UserRepositoryMock struct {
-	// CreateUserFunc mocks the CreateUser method.
-	CreateUserFunc func(ctx context.Context, user *domain.User) error
+	// DeleteFunc mocks the Delete method.
+	DeleteFunc func(ctx context.Context, id string) error
 
-	// DeleteUserByIdFunc mocks the DeleteUserById method.
-	DeleteUserByIdFunc func(ctx context.Context, id string) error
-
-	// GetUserByIdFunc mocks the GetUserById method.
-	GetUserByIdFunc func(ctx context.Context, id string) (*domain.User, error)
+	// GetUserByIDFunc mocks the GetUserByID method.
+	GetUserByIDFunc func(ctx context.Context, id string) (*domain.User, error)
 
 	// GetUsersFunc mocks the GetUsers method.
-	GetUsersFunc func(contextMoqParam context.Context) ([]*domain.User, error)
+	GetUsersFunc func(ctx context.Context) ([]*domain.User, error)
 
-	// UpdateUserByIdFunc mocks the UpdateUserById method.
-	UpdateUserByIdFunc func(ctx context.Context, id string, user *domain.User) error
+	// SaveFunc mocks the Save method.
+	SaveFunc func(ctx context.Context, user *domain.User) error
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// CreateUser holds details about calls to the CreateUser method.
-		CreateUser []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// User is the user argument value.
-			User *domain.User
-		}
-		// DeleteUserById holds details about calls to the DeleteUserById method.
-		DeleteUserById []struct {
+		// Delete holds details about calls to the Delete method.
+		Delete []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
 			ID string
 		}
-		// GetUserById holds details about calls to the GetUserById method.
-		GetUserById []struct {
+		// GetUserByID holds details about calls to the GetUserByID method.
+		GetUserByID []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
@@ -82,66 +69,27 @@ type UserRepositoryMock struct {
 		}
 		// GetUsers holds details about calls to the GetUsers method.
 		GetUsers []struct {
-			// ContextMoqParam is the contextMoqParam argument value.
-			ContextMoqParam context.Context
-		}
-		// UpdateUserById holds details about calls to the UpdateUserById method.
-		UpdateUserById []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// ID is the id argument value.
-			ID string
+		}
+		// Save holds details about calls to the Save method.
+		Save []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// User is the user argument value.
 			User *domain.User
 		}
 	}
-	lockCreateUser     sync.RWMutex
-	lockDeleteUserById sync.RWMutex
-	lockGetUserById    sync.RWMutex
-	lockGetUsers       sync.RWMutex
-	lockUpdateUserById sync.RWMutex
+	lockDelete      sync.RWMutex
+	lockGetUserByID sync.RWMutex
+	lockGetUsers    sync.RWMutex
+	lockSave        sync.RWMutex
 }
 
-// CreateUser calls CreateUserFunc.
-func (mock *UserRepositoryMock) CreateUser(ctx context.Context, user *domain.User) error {
-	if mock.CreateUserFunc == nil {
-		panic("UserRepositoryMock.CreateUserFunc: method is nil but UserRepository.CreateUser was just called")
-	}
-	callInfo := struct {
-		Ctx  context.Context
-		User *domain.User
-	}{
-		Ctx:  ctx,
-		User: user,
-	}
-	mock.lockCreateUser.Lock()
-	mock.calls.CreateUser = append(mock.calls.CreateUser, callInfo)
-	mock.lockCreateUser.Unlock()
-	return mock.CreateUserFunc(ctx, user)
-}
-
-// CreateUserCalls gets all the calls that were made to CreateUser.
-// Check the length with:
-//
-//	len(mockedUserRepository.CreateUserCalls())
-func (mock *UserRepositoryMock) CreateUserCalls() []struct {
-	Ctx  context.Context
-	User *domain.User
-} {
-	var calls []struct {
-		Ctx  context.Context
-		User *domain.User
-	}
-	mock.lockCreateUser.RLock()
-	calls = mock.calls.CreateUser
-	mock.lockCreateUser.RUnlock()
-	return calls
-}
-
-// DeleteUserById calls DeleteUserByIdFunc.
-func (mock *UserRepositoryMock) DeleteUserById(ctx context.Context, id string) error {
-	if mock.DeleteUserByIdFunc == nil {
-		panic("UserRepositoryMock.DeleteUserByIdFunc: method is nil but UserRepository.DeleteUserById was just called")
+// Delete calls DeleteFunc.
+func (mock *UserRepositoryMock) Delete(ctx context.Context, id string) error {
+	if mock.DeleteFunc == nil {
+		panic("UserRepositoryMock.DeleteFunc: method is nil but UserRepository.Delete was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -150,17 +98,17 @@ func (mock *UserRepositoryMock) DeleteUserById(ctx context.Context, id string) e
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockDeleteUserById.Lock()
-	mock.calls.DeleteUserById = append(mock.calls.DeleteUserById, callInfo)
-	mock.lockDeleteUserById.Unlock()
-	return mock.DeleteUserByIdFunc(ctx, id)
+	mock.lockDelete.Lock()
+	mock.calls.Delete = append(mock.calls.Delete, callInfo)
+	mock.lockDelete.Unlock()
+	return mock.DeleteFunc(ctx, id)
 }
 
-// DeleteUserByIdCalls gets all the calls that were made to DeleteUserById.
+// DeleteCalls gets all the calls that were made to Delete.
 // Check the length with:
 //
-//	len(mockedUserRepository.DeleteUserByIdCalls())
-func (mock *UserRepositoryMock) DeleteUserByIdCalls() []struct {
+//	len(mockedUserRepository.DeleteCalls())
+func (mock *UserRepositoryMock) DeleteCalls() []struct {
 	Ctx context.Context
 	ID  string
 } {
@@ -168,16 +116,16 @@ func (mock *UserRepositoryMock) DeleteUserByIdCalls() []struct {
 		Ctx context.Context
 		ID  string
 	}
-	mock.lockDeleteUserById.RLock()
-	calls = mock.calls.DeleteUserById
-	mock.lockDeleteUserById.RUnlock()
+	mock.lockDelete.RLock()
+	calls = mock.calls.Delete
+	mock.lockDelete.RUnlock()
 	return calls
 }
 
-// GetUserById calls GetUserByIdFunc.
-func (mock *UserRepositoryMock) GetUserById(ctx context.Context, id string) (*domain.User, error) {
-	if mock.GetUserByIdFunc == nil {
-		panic("UserRepositoryMock.GetUserByIdFunc: method is nil but UserRepository.GetUserById was just called")
+// GetUserByID calls GetUserByIDFunc.
+func (mock *UserRepositoryMock) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
+	if mock.GetUserByIDFunc == nil {
+		panic("UserRepositoryMock.GetUserByIDFunc: method is nil but UserRepository.GetUserByID was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -186,17 +134,17 @@ func (mock *UserRepositoryMock) GetUserById(ctx context.Context, id string) (*do
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockGetUserById.Lock()
-	mock.calls.GetUserById = append(mock.calls.GetUserById, callInfo)
-	mock.lockGetUserById.Unlock()
-	return mock.GetUserByIdFunc(ctx, id)
+	mock.lockGetUserByID.Lock()
+	mock.calls.GetUserByID = append(mock.calls.GetUserByID, callInfo)
+	mock.lockGetUserByID.Unlock()
+	return mock.GetUserByIDFunc(ctx, id)
 }
 
-// GetUserByIdCalls gets all the calls that were made to GetUserById.
+// GetUserByIDCalls gets all the calls that were made to GetUserByID.
 // Check the length with:
 //
-//	len(mockedUserRepository.GetUserByIdCalls())
-func (mock *UserRepositoryMock) GetUserByIdCalls() []struct {
+//	len(mockedUserRepository.GetUserByIDCalls())
+func (mock *UserRepositoryMock) GetUserByIDCalls() []struct {
 	Ctx context.Context
 	ID  string
 } {
@@ -204,26 +152,26 @@ func (mock *UserRepositoryMock) GetUserByIdCalls() []struct {
 		Ctx context.Context
 		ID  string
 	}
-	mock.lockGetUserById.RLock()
-	calls = mock.calls.GetUserById
-	mock.lockGetUserById.RUnlock()
+	mock.lockGetUserByID.RLock()
+	calls = mock.calls.GetUserByID
+	mock.lockGetUserByID.RUnlock()
 	return calls
 }
 
 // GetUsers calls GetUsersFunc.
-func (mock *UserRepositoryMock) GetUsers(contextMoqParam context.Context) ([]*domain.User, error) {
+func (mock *UserRepositoryMock) GetUsers(ctx context.Context) ([]*domain.User, error) {
 	if mock.GetUsersFunc == nil {
 		panic("UserRepositoryMock.GetUsersFunc: method is nil but UserRepository.GetUsers was just called")
 	}
 	callInfo := struct {
-		ContextMoqParam context.Context
+		Ctx context.Context
 	}{
-		ContextMoqParam: contextMoqParam,
+		Ctx: ctx,
 	}
 	mock.lockGetUsers.Lock()
 	mock.calls.GetUsers = append(mock.calls.GetUsers, callInfo)
 	mock.lockGetUsers.Unlock()
-	return mock.GetUsersFunc(contextMoqParam)
+	return mock.GetUsersFunc(ctx)
 }
 
 // GetUsersCalls gets all the calls that were made to GetUsers.
@@ -231,10 +179,10 @@ func (mock *UserRepositoryMock) GetUsers(contextMoqParam context.Context) ([]*do
 //
 //	len(mockedUserRepository.GetUsersCalls())
 func (mock *UserRepositoryMock) GetUsersCalls() []struct {
-	ContextMoqParam context.Context
+	Ctx context.Context
 } {
 	var calls []struct {
-		ContextMoqParam context.Context
+		Ctx context.Context
 	}
 	mock.lockGetUsers.RLock()
 	calls = mock.calls.GetUsers
@@ -242,42 +190,38 @@ func (mock *UserRepositoryMock) GetUsersCalls() []struct {
 	return calls
 }
 
-// UpdateUserById calls UpdateUserByIdFunc.
-func (mock *UserRepositoryMock) UpdateUserById(ctx context.Context, id string, user *domain.User) error {
-	if mock.UpdateUserByIdFunc == nil {
-		panic("UserRepositoryMock.UpdateUserByIdFunc: method is nil but UserRepository.UpdateUserById was just called")
+// Save calls SaveFunc.
+func (mock *UserRepositoryMock) Save(ctx context.Context, user *domain.User) error {
+	if mock.SaveFunc == nil {
+		panic("UserRepositoryMock.SaveFunc: method is nil but UserRepository.Save was just called")
 	}
 	callInfo := struct {
 		Ctx  context.Context
-		ID   string
 		User *domain.User
 	}{
 		Ctx:  ctx,
-		ID:   id,
 		User: user,
 	}
-	mock.lockUpdateUserById.Lock()
-	mock.calls.UpdateUserById = append(mock.calls.UpdateUserById, callInfo)
-	mock.lockUpdateUserById.Unlock()
-	return mock.UpdateUserByIdFunc(ctx, id, user)
+	mock.lockSave.Lock()
+	mock.calls.Save = append(mock.calls.Save, callInfo)
+	mock.lockSave.Unlock()
+	return mock.SaveFunc(ctx, user)
 }
 
-// UpdateUserByIdCalls gets all the calls that were made to UpdateUserById.
+// SaveCalls gets all the calls that were made to Save.
 // Check the length with:
 //
-//	len(mockedUserRepository.UpdateUserByIdCalls())
-func (mock *UserRepositoryMock) UpdateUserByIdCalls() []struct {
+//	len(mockedUserRepository.SaveCalls())
+func (mock *UserRepositoryMock) SaveCalls() []struct {
 	Ctx  context.Context
-	ID   string
 	User *domain.User
 } {
 	var calls []struct {
 		Ctx  context.Context
-		ID   string
 		User *domain.User
 	}
-	mock.lockUpdateUserById.RLock()
-	calls = mock.calls.UpdateUserById
-	mock.lockUpdateUserById.RUnlock()
+	mock.lockSave.RLock()
+	calls = mock.calls.Save
+	mock.lockSave.RUnlock()
 	return calls
 }

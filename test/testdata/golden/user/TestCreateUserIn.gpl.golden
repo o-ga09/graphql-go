@@ -1,0 +1,7 @@
+mutation {
+  createUser(userId: "3", username: "user3", displayname: "user3") {
+    userId
+    username
+    displayname
+  }
+}

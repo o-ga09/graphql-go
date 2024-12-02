@@ -11,9 +11,9 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/o-ga09/graphql-go/graph"
 	"github.com/o-ga09/graphql-go/internal/db"
 	"github.com/o-ga09/graphql-go/internal/db/dao"
-	"github.com/o-ga09/graphql-go/internal/graph"
 	"github.com/o-ga09/graphql-go/internal/service"
 	"github.com/o-ga09/graphql-go/pkg/logger"
 )
@@ -33,6 +33,16 @@ func main() {
 		slog.Log(ctx, logger.SeverityError, "failed to connect db")
 		return
 	}
+
+	result, err := conn.Query("SELECT 1")
+	if err != nil {
+		slog.Log(ctx, logger.SeverityError, "failed to ping db")
+		return
+	}
+	defer result.Close()
+
+	slog.Log(ctx, logger.SeverityInfo, "connected to db")
+
 	noteRepo := dao.NewNoteDao(conn)
 	userRepo := dao.NewUserDao(conn)
 	noteService := service.NewNoteService(noteRepo)

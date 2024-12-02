@@ -20,11 +20,8 @@ var _ repository.NoteRepository = &NoteRepositoryMock{}
 //
 //		// make and configure a mocked repository.NoteRepository
 //		mockedNoteRepository := &NoteRepositoryMock{
-//			CreateNoteFunc: func(ctx context.Context, note *domain.Note) error {
-//				panic("mock out the CreateNote method")
-//			},
-//			DeleteNoteByIDFunc: func(ctx context.Context, id string) error {
-//				panic("mock out the DeleteNoteByID method")
+//			DeleteFunc: func(ctx context.Context, id string) error {
+//				panic("mock out the Delete method")
 //			},
 //			GetNoteByIDFunc: func(ctx context.Context, id string) (*domain.Note, error) {
 //				panic("mock out the GetNoteByID method")
@@ -32,8 +29,8 @@ var _ repository.NoteRepository = &NoteRepositoryMock{}
 //			GetNotesFunc: func(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
 //				panic("mock out the GetNotes method")
 //			},
-//			UpdateNoteByIDFunc: func(ctx context.Context, id string, note *domain.Note) error {
-//				panic("mock out the UpdateNoteByID method")
+//			SaveFunc: func(ctx context.Context, note *domain.Note) error {
+//				panic("mock out the Save method")
 //			},
 //		}
 //
@@ -42,11 +39,8 @@ var _ repository.NoteRepository = &NoteRepositoryMock{}
 //
 //	}
 type NoteRepositoryMock struct {
-	// CreateNoteFunc mocks the CreateNote method.
-	CreateNoteFunc func(ctx context.Context, note *domain.Note) error
-
-	// DeleteNoteByIDFunc mocks the DeleteNoteByID method.
-	DeleteNoteByIDFunc func(ctx context.Context, id string) error
+	// DeleteFunc mocks the Delete method.
+	DeleteFunc func(ctx context.Context, id string) error
 
 	// GetNoteByIDFunc mocks the GetNoteByID method.
 	GetNoteByIDFunc func(ctx context.Context, id string) (*domain.Note, error)
@@ -54,20 +48,13 @@ type NoteRepositoryMock struct {
 	// GetNotesFunc mocks the GetNotes method.
 	GetNotesFunc func(contextMoqParam context.Context, s string) ([]*domain.Note, error)
 
-	// UpdateNoteByIDFunc mocks the UpdateNoteByID method.
-	UpdateNoteByIDFunc func(ctx context.Context, id string, note *domain.Note) error
+	// SaveFunc mocks the Save method.
+	SaveFunc func(ctx context.Context, note *domain.Note) error
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// CreateNote holds details about calls to the CreateNote method.
-		CreateNote []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Note is the note argument value.
-			Note *domain.Note
-		}
-		// DeleteNoteByID holds details about calls to the DeleteNoteByID method.
-		DeleteNoteByID []struct {
+		// Delete holds details about calls to the Delete method.
+		Delete []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
@@ -87,63 +74,24 @@ type NoteRepositoryMock struct {
 			// S is the s argument value.
 			S string
 		}
-		// UpdateNoteByID holds details about calls to the UpdateNoteByID method.
-		UpdateNoteByID []struct {
+		// Save holds details about calls to the Save method.
+		Save []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// ID is the id argument value.
-			ID string
 			// Note is the note argument value.
 			Note *domain.Note
 		}
 	}
-	lockCreateNote     sync.RWMutex
-	lockDeleteNoteByID sync.RWMutex
-	lockGetNoteByID    sync.RWMutex
-	lockGetNotes       sync.RWMutex
-	lockUpdateNoteByID sync.RWMutex
+	lockDelete      sync.RWMutex
+	lockGetNoteByID sync.RWMutex
+	lockGetNotes    sync.RWMutex
+	lockSave        sync.RWMutex
 }
 
-// CreateNote calls CreateNoteFunc.
-func (mock *NoteRepositoryMock) CreateNote(ctx context.Context, note *domain.Note) error {
-	if mock.CreateNoteFunc == nil {
-		panic("NoteRepositoryMock.CreateNoteFunc: method is nil but NoteRepository.CreateNote was just called")
-	}
-	callInfo := struct {
-		Ctx  context.Context
-		Note *domain.Note
-	}{
-		Ctx:  ctx,
-		Note: note,
-	}
-	mock.lockCreateNote.Lock()
-	mock.calls.CreateNote = append(mock.calls.CreateNote, callInfo)
-	mock.lockCreateNote.Unlock()
-	return mock.CreateNoteFunc(ctx, note)
-}
-
-// CreateNoteCalls gets all the calls that were made to CreateNote.
-// Check the length with:
-//
-//	len(mockedNoteRepository.CreateNoteCalls())
-func (mock *NoteRepositoryMock) CreateNoteCalls() []struct {
-	Ctx  context.Context
-	Note *domain.Note
-} {
-	var calls []struct {
-		Ctx  context.Context
-		Note *domain.Note
-	}
-	mock.lockCreateNote.RLock()
-	calls = mock.calls.CreateNote
-	mock.lockCreateNote.RUnlock()
-	return calls
-}
-
-// DeleteNoteByID calls DeleteNoteByIDFunc.
-func (mock *NoteRepositoryMock) DeleteNoteByID(ctx context.Context, id string) error {
-	if mock.DeleteNoteByIDFunc == nil {
-		panic("NoteRepositoryMock.DeleteNoteByIDFunc: method is nil but NoteRepository.DeleteNoteByID was just called")
+// Delete calls DeleteFunc.
+func (mock *NoteRepositoryMock) Delete(ctx context.Context, id string) error {
+	if mock.DeleteFunc == nil {
+		panic("NoteRepositoryMock.DeleteFunc: method is nil but NoteRepository.Delete was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -152,17 +100,17 @@ func (mock *NoteRepositoryMock) DeleteNoteByID(ctx context.Context, id string) e
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockDeleteNoteByID.Lock()
-	mock.calls.DeleteNoteByID = append(mock.calls.DeleteNoteByID, callInfo)
-	mock.lockDeleteNoteByID.Unlock()
-	return mock.DeleteNoteByIDFunc(ctx, id)
+	mock.lockDelete.Lock()
+	mock.calls.Delete = append(mock.calls.Delete, callInfo)
+	mock.lockDelete.Unlock()
+	return mock.DeleteFunc(ctx, id)
 }
 
-// DeleteNoteByIDCalls gets all the calls that were made to DeleteNoteByID.
+// DeleteCalls gets all the calls that were made to Delete.
 // Check the length with:
 //
-//	len(mockedNoteRepository.DeleteNoteByIDCalls())
-func (mock *NoteRepositoryMock) DeleteNoteByIDCalls() []struct {
+//	len(mockedNoteRepository.DeleteCalls())
+func (mock *NoteRepositoryMock) DeleteCalls() []struct {
 	Ctx context.Context
 	ID  string
 } {
@@ -170,9 +118,9 @@ func (mock *NoteRepositoryMock) DeleteNoteByIDCalls() []struct {
 		Ctx context.Context
 		ID  string
 	}
-	mock.lockDeleteNoteByID.RLock()
-	calls = mock.calls.DeleteNoteByID
-	mock.lockDeleteNoteByID.RUnlock()
+	mock.lockDelete.RLock()
+	calls = mock.calls.Delete
+	mock.lockDelete.RUnlock()
 	return calls
 }
 
@@ -248,42 +196,38 @@ func (mock *NoteRepositoryMock) GetNotesCalls() []struct {
 	return calls
 }
 
-// UpdateNoteByID calls UpdateNoteByIDFunc.
-func (mock *NoteRepositoryMock) UpdateNoteByID(ctx context.Context, id string, note *domain.Note) error {
-	if mock.UpdateNoteByIDFunc == nil {
-		panic("NoteRepositoryMock.UpdateNoteByIDFunc: method is nil but NoteRepository.UpdateNoteByID was just called")
+// Save calls SaveFunc.
+func (mock *NoteRepositoryMock) Save(ctx context.Context, note *domain.Note) error {
+	if mock.SaveFunc == nil {
+		panic("NoteRepositoryMock.SaveFunc: method is nil but NoteRepository.Save was just called")
 	}
 	callInfo := struct {
 		Ctx  context.Context
-		ID   string
 		Note *domain.Note
 	}{
 		Ctx:  ctx,
-		ID:   id,
 		Note: note,
 	}
-	mock.lockUpdateNoteByID.Lock()
-	mock.calls.UpdateNoteByID = append(mock.calls.UpdateNoteByID, callInfo)
-	mock.lockUpdateNoteByID.Unlock()
-	return mock.UpdateNoteByIDFunc(ctx, id, note)
+	mock.lockSave.Lock()
+	mock.calls.Save = append(mock.calls.Save, callInfo)
+	mock.lockSave.Unlock()
+	return mock.SaveFunc(ctx, note)
 }
 
-// UpdateNoteByIDCalls gets all the calls that were made to UpdateNoteByID.
+// SaveCalls gets all the calls that were made to Save.
 // Check the length with:
 //
-//	len(mockedNoteRepository.UpdateNoteByIDCalls())
-func (mock *NoteRepositoryMock) UpdateNoteByIDCalls() []struct {
+//	len(mockedNoteRepository.SaveCalls())
+func (mock *NoteRepositoryMock) SaveCalls() []struct {
 	Ctx  context.Context
-	ID   string
 	Note *domain.Note
 } {
 	var calls []struct {
 		Ctx  context.Context
-		ID   string
 		Note *domain.Note
 	}
-	mock.lockUpdateNoteByID.RLock()
-	calls = mock.calls.UpdateNoteByID
-	mock.lockUpdateNoteByID.RUnlock()
+	mock.lockSave.RLock()
+	calls = mock.calls.Save
+	mock.lockSave.RUnlock()
 	return calls
 }

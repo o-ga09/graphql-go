@@ -1,0 +1,14 @@
+mutation {
+  createNote(
+    userId: "1"
+    title: "テストブログ"
+    content: "ああああああああああああああああああああああ"
+    tags: "タグ１,タグ２,タグ３"
+  ) {
+    title
+    content
+    tags {
+      name
+    }
+  }
+}

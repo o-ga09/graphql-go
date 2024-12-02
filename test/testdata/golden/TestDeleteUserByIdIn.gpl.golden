@@ -1,7 +1,0 @@
-mutation {
-  deleteUser(input: {
-    id: "d4a6e9b6-f079-45c9-b6d0-565cf4280596",
-  }){
-    id
-  }
-}

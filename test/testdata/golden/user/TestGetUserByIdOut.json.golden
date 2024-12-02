@@ -1,0 +1,9 @@
+{
+  "data": {
+    "getUser": {
+      "userId": "1",
+      "username": "admin",
+      "displayname": "admin"
+    }
+  }
+}

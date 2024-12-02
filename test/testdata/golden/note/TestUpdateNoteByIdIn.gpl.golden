@@ -1,0 +1,10 @@
+mutation {
+  updateNote(noteId: "1", title: "テスト", content: "いいい", tags: "タグ１,タグ２,タグ３") {
+    noteId
+    title
+    content
+    tags {
+      name
+    }
+  }
+}

@@ -43,7 +43,7 @@ func Test_noteDao_GetNotes(t *testing.T) {
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
 	res := []*domain.Note{
-		{ID: "1", UserID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 
 	expected := db.GetNotesRow{
@@ -59,7 +59,7 @@ func Test_noteDao_GetNotes(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "notes.note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
 	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
-	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.user_id = \? ORDER BY created_at DESC`).WillReturnRows(rows)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.user_id = \? AND delete_at IS NULL ORDER BY created_at DESC`).WillReturnRows(rows)
 
 	if err != nil {
 		t.Fatal(err)
@@ -92,7 +92,6 @@ func Test_noteDao_GetNotes(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Log(got[0])
 				t.Errorf("noteDao.GetNotes() = %v, want %v", got, tt.want)
 			}
 		})
@@ -107,7 +106,7 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 		t.Fatal(err)
 	}
 	res := []*domain.Note{
-		{ID: "1", UserID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 
 	expected := db.GetNoteRow{
@@ -123,7 +122,7 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
 	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
-	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? LIMIT 1`).WithArgs("1").WillReturnRows(rows)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? AND delete_at IS NULL LIMIT 1`).WithArgs("1").WillReturnRows(rows)
 
 	type fields struct {
 		query *db.Queries
@@ -159,7 +158,7 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 	}
 }
 
-func Test_noteDao_CreateNote(t *testing.T) {
+func Test_noteDao_Save_Create(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
@@ -167,10 +166,11 @@ func Test_noteDao_CreateNote(t *testing.T) {
 		t.Fatal(err)
 	}
 	res := []*domain.Note{
-		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 
 	mock.ExpectExec("INSERT INTO notes").WithArgs("1", "title1", "tags1,tags2,tags3", "content1").WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("INSERT INTO user_notes").WithArgs("1", "1").WillReturnResult(sqlmock.NewResult(1, 1))
 
 	type fields struct {
 		query *db.Queries
@@ -185,7 +185,7 @@ func Test_noteDao_CreateNote(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "success", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, note: res[0]}, wantErr: false},
+		{name: "TestCreateNote", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, note: res[0]}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -193,14 +193,14 @@ func Test_noteDao_CreateNote(t *testing.T) {
 			n := &noteDao{
 				query: tt.fields.query,
 			}
-			if err := n.CreateNote(tt.args.ctx, tt.args.note); (err != nil) != tt.wantErr {
-				t.Errorf("noteDao.CreateNote() error = %v, wantErr %v", err, tt.wantErr)
+			if err := n.Save(tt.args.ctx, tt.args.note); (err != nil) != tt.wantErr {
+				t.Errorf("noteDao.Save() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func Test_noteDao_UpdateNoteByID(t *testing.T) {
+func Test_noteDao_Save_Update(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
@@ -208,17 +208,38 @@ func Test_noteDao_UpdateNoteByID(t *testing.T) {
 		t.Fatal(err)
 	}
 	res := []*domain.Note{
-		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 
-	mock.ExpectExec("UPDATE notes").WithArgs("title1", "tags1,tags2,tags3", "content1", "1").WillReturnResult(sqlmock.NewResult(1, 1))
+	expected := db.GetNoteRow{
+		ID:        1,
+		NoteID:    "1",
+		Title:     "title1",
+		Tags:      "tags1,tags2,tags3",
+		Content:   "content1",
+		CreatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		UpdatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		UserID:    "1",
+	}
+
+	rows := sqlmock.NewRows([]string{"id", "notes.note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
+	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? AND delete_at IS NULL LIMIT 1`).WithArgs("1").WillReturnRows(rows)
+
+	arg := db.UpdateNoteParams{
+		NoteID:  "1",
+		Title:   "title1",
+		Tags:    "tags1,tags2,tags3",
+		Content: "content1",
+	}
+
+	mock.ExpectExec("UPDATE notes").WithArgs(arg.Title, arg.Tags, arg.Content, arg.NoteID).WillReturnResult(sqlmock.NewResult(1, 1))
 
 	type fields struct {
 		query *db.Queries
 	}
 	type args struct {
 		ctx  context.Context
-		id   string
 		note *domain.Note
 	}
 	tests := []struct {
@@ -227,7 +248,7 @@ func Test_noteDao_UpdateNoteByID(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "success", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, id: "1", note: res[0]}, wantErr: false},
+		{name: "TestUpdateNote", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, note: res[0]}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -235,14 +256,14 @@ func Test_noteDao_UpdateNoteByID(t *testing.T) {
 			n := &noteDao{
 				query: tt.fields.query,
 			}
-			if err := n.UpdateNoteByID(tt.args.ctx, tt.args.id, tt.args.note); (err != nil) != tt.wantErr {
-				t.Errorf("noteDao.UpdateNoteByID() error = %v, wantErr %v", err, tt.wantErr)
+			if err := n.Save(tt.args.ctx, tt.args.note); (err != nil) != tt.wantErr {
+				t.Errorf("noteDao.Save() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func Test_noteDao_DeleteNoteByID(t *testing.T) {
+func Test_noteDao_Delete(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
@@ -250,7 +271,7 @@ func Test_noteDao_DeleteNoteByID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mock.ExpectExec("DELETE FROM notes").WithArgs("1").WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("UPDATE notes").WithArgs("1").WillReturnResult(sqlmock.NewResult(1, 1))
 
 	type fields struct {
 		query *db.Queries
@@ -273,7 +294,7 @@ func Test_noteDao_DeleteNoteByID(t *testing.T) {
 			n := &noteDao{
 				query: tt.fields.query,
 			}
-			if err := n.DeleteNoteByID(tt.args.ctx, tt.args.id); (err != nil) != tt.wantErr {
+			if err := n.Delete(tt.args.ctx, tt.args.id); (err != nil) != tt.wantErr {
 				t.Errorf("noteDao.DeleteNoteByID() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

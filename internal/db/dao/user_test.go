@@ -47,25 +47,21 @@ func Test_userDao_GetUsers(t *testing.T) {
 	}
 
 	res := []*domain.User{
-		{ID: "1", FirstName: "name1", LastName: "name1", Email: "email1", Address: "address1", Sex: 1, BirthDay: "2024-08-15", Password: "password1", CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserName: "name1", DisplayName: "name1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 
 	expected := db.User{
-		ID:        1,
-		UserID:    "1",
-		Name:      "name1 name1",
-		Email:     "email1",
-		Address:   "address1",
-		Birthday:  "2024-08-15",
-		Password:  "password1",
-		Sex:       1,
-		CreatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-		UpdatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		ID:          1,
+		UserID:      "1",
+		Username:    "name1",
+		Displayname: "name1",
+		CreatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		UpdatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 	}
 
-	rows := sqlmock.NewRows([]string{"id", "user_id", "name", "address", "email", "password", "sex", "birthday", "created_at", "updated_at"})
-	rows.AddRow(expected.ID, expected.UserID, expected.Name, expected.Address, expected.Email, expected.Password, expected.Sex, expected.Birthday, expected.CreatedAt.Time, expected.UpdatedAt.Time)
-	mock.ExpectQuery("SELECT id, user_id, name, address, email, password, sex, birthday, created_at, updated_at FROM users ORDER BY created_at DESC").WillReturnRows(rows)
+	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
+	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
+	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE delete_at IS NULL ORDER BY created_at DESC").WillReturnRows(rows)
 
 	type fields struct {
 		query *db.Queries
@@ -109,25 +105,21 @@ func Test_userDao_GetUserById(t *testing.T) {
 	}
 
 	res := []*domain.User{
-		{ID: "1", FirstName: "name1", LastName: "name1", Email: "email1", Address: "address1", Sex: 1, BirthDay: "2024-08-15", Password: "password1", CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserName: "name1", DisplayName: "name1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 
 	expected := db.User{
-		ID:        1,
-		UserID:    "1",
-		Name:      "name1 name1",
-		Email:     "email1",
-		Address:   "address1",
-		Birthday:  "2024-08-15",
-		Password:  "password1",
-		Sex:       1,
-		CreatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-		UpdatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		ID:          1,
+		UserID:      "1",
+		Username:    "name1",
+		Displayname: "name1",
+		CreatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		UpdatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 	}
 
-	rows := sqlmock.NewRows([]string{"id", "user_id", "name", "address", "email", "password", "sex", "birthday", "created_at", "updated_at"})
-	rows.AddRow(expected.ID, expected.UserID, expected.Name, expected.Address, expected.Email, expected.Password, expected.Sex, expected.Birthday, expected.CreatedAt.Time, expected.UpdatedAt.Time)
-	mock.ExpectQuery("SELECT id, user_id, name, address, email, password, sex, birthday, created_at, updated_at FROM users WHERE user_id = \\? LIMIT 1").WithArgs("1").WillReturnRows(rows)
+	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
+	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
+	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE user_id = \\? AND delete_at IS NULL LIMIT 1").WithArgs("1").WillReturnRows(rows)
 
 	type fields struct {
 		query *db.Queries
@@ -151,7 +143,7 @@ func Test_userDao_GetUserById(t *testing.T) {
 			u := &userDao{
 				query: tt.fields.query,
 			}
-			got, err := u.GetUserById(tt.args.ctx, tt.args.id)
+			got, err := u.GetUserByID(tt.args.ctx, tt.args.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("userDao.GetUserById() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -163,7 +155,7 @@ func Test_userDao_GetUserById(t *testing.T) {
 	}
 }
 
-func Test_userDao_CreateUser(t *testing.T) {
+func Test_userDao_Save_Create(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
@@ -172,10 +164,10 @@ func Test_userDao_CreateUser(t *testing.T) {
 	}
 
 	res := []*domain.User{
-		{ID: "1", FirstName: "name1", LastName: "name1", Email: "email1", Address: "address1", Sex: 1, BirthDay: "2024-08-15", Password: "password1", CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserName: "name1", DisplayName: "name1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 
-	mock.ExpectExec("INSERT INTO users").WithArgs("1", "name1 name1", "email1", "address1", 1, "2024-08-15", "password1").WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("INSERT INTO users").WithArgs("1", "name1", "name1").WillReturnResult(sqlmock.NewResult(1, 1))
 
 	type fields struct {
 		query *db.Queries
@@ -198,14 +190,14 @@ func Test_userDao_CreateUser(t *testing.T) {
 			u := &userDao{
 				query: tt.fields.query,
 			}
-			if err := u.CreateUser(tt.args.ctx, tt.args.user); (err != nil) != tt.wantErr {
-				t.Errorf("userDao.CreateUser() error = %v, wantErr %v", err, tt.wantErr)
+			if err := u.Save(tt.args.ctx, tt.args.user); (err != nil) != tt.wantErr {
+				t.Errorf("userDao.Save() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func Test_userDao_UpdateUserById(t *testing.T) {
+func Test_userDao_Save_Update(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
@@ -214,37 +206,35 @@ func Test_userDao_UpdateUserById(t *testing.T) {
 	}
 
 	res := []*domain.User{
-		{ID: "1", FirstName: "name1", LastName: "name1", Email: "email1", Address: "address1", Sex: 1, BirthDay: "2024-08-15", Password: "password1", CreatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), UpdatedDateTime: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC)},
+		{ID: "1", UserName: "name1", DisplayName: "name1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
+
+	expected := db.User{
+		ID:          1,
+		UserID:      "1",
+		Username:    "name1",
+		Displayname: "name1",
+		CreatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		UpdatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+	}
+
+	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
+	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
+	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE user_id = \\? AND delete_at IS NULL LIMIT 1").WithArgs("1").WillReturnRows(rows)
 
 	arg := db.UpdateUserParams{
-		Name:     "name1 name1",
-		Email:    "email1",
-		Address:  "address1",
-		Sex:      1,
-		Birthday: "2024-08-15",
-		Password: "password1",
-		UserID:   "1",
+		Username:    "name1",
+		Displayname: "name1",
+		UserID:      "1",
 	}
 
-	mock.ExpectExec("UPDATE users").
-		WithArgs(
-			arg.Name,
-			arg.Email,
-			arg.Address,
-			arg.Sex,
-			arg.Birthday,
-			arg.Password,
-			arg.UserID,
-		).
-		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("UPDATE users").WithArgs(arg.Username, arg.Displayname, arg.UserID).WillReturnResult(sqlmock.NewResult(1, 1))
 
 	type fields struct {
 		query *db.Queries
 	}
 	type args struct {
 		ctx  context.Context
-		id   string
 		user *domain.User
 	}
 	tests := []struct {
@@ -253,7 +243,7 @@ func Test_userDao_UpdateUserById(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "TestUpdateUserById", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, id: "1", user: res[0]}, wantErr: false},
+		{name: "TestUpdateUser", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx, user: res[0]}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -261,14 +251,14 @@ func Test_userDao_UpdateUserById(t *testing.T) {
 			u := &userDao{
 				query: tt.fields.query,
 			}
-			if err := u.UpdateUserById(tt.args.ctx, tt.args.id, tt.args.user); (err != nil) != tt.wantErr {
-				t.Errorf("userDao.UpdateUserById() error = %v, wantErr %v", err, tt.wantErr)
+			if err := u.Save(tt.args.ctx, tt.args.user); (err != nil) != tt.wantErr {
+				t.Errorf("userDao.Save() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func Test_userDao_DeleteUserById(t *testing.T) {
+func Test_userDao_Delete(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	dbmock, mock, err := sqlmock.New()
@@ -276,7 +266,7 @@ func Test_userDao_DeleteUserById(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mock.ExpectExec("DELETE FROM users").WithArgs("1").WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("UPDATE users").WithArgs("1").WillReturnResult(sqlmock.NewResult(1, 1))
 
 	type fields struct {
 		query *db.Queries
@@ -299,8 +289,8 @@ func Test_userDao_DeleteUserById(t *testing.T) {
 			u := &userDao{
 				query: tt.fields.query,
 			}
-			if err := u.DeleteUserById(tt.args.ctx, tt.args.id); (err != nil) != tt.wantErr {
-				t.Errorf("userDao.DeleteUserById() error = %v, wantErr %v", err, tt.wantErr)
+			if err := u.Delete(tt.args.ctx, tt.args.id); (err != nil) != tt.wantErr {
+				t.Errorf("userDao.Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

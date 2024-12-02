@@ -1,0 +1,20 @@
+{
+  "data": {
+    "updateNote": {
+      "noteId": "1",
+      "title": "テスト",
+      "content": "いいい",
+      "tags": [
+        {
+          "name": "タグ１"
+        },
+        {
+          "name": "タグ２"
+        },
+        {
+          "name": "タグ３"
+        }
+      ]
+    }
+  }
+}

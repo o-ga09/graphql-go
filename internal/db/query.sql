@@ -1,12 +1,12 @@
 -- name: GetNote :one
 SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.note_id = ? LIMIT 1;
+WHERE user_notes.note_id = ? AND delete_at IS NULL LIMIT 1;
 
 -- name: GetNotes :many
 SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.user_id = ?
+WHERE user_notes.user_id = ? AND delete_at IS NULL
 ORDER BY created_at DESC;
 
 -- name: CreateNote :execresult
@@ -25,38 +25,39 @@ SET title = ?,
 WHERE note_id = ?;
 
 -- name: DeleteNote :exec
-DELETE FROM notes
+UPDATE notes
+SET delete_at = CURRENT_TIMESTAMP
 WHERE note_id = ?;
 
 -- name: CreateUser :execresult
 INSERT INTO users (
     user_id,
-    name,
-    email,
-    address,
-    sex,
-    birthday,
-    password
-) VALUES (?, ?, ?, ?, ?, ?, ?);
+    username,
+    displayname
+) VALUES (?, ?, ?);
 
 -- name: GetUser :one
-SELECT * FROM users
-WHERE user_id = ? LIMIT 1;
+SELECT id, user_id, username, displayname, created_at, updated_at FROM users
+WHERE user_id = ? AND delete_at IS NULL LIMIT 1;
 
 -- name: GetUsers :many
-SELECT * FROM users
+SELECT id, user_id, username, displayname, created_at, updated_at FROM users
+WHERE delete_at IS NULL
 ORDER BY created_at DESC;
 
 -- name: UpdateUser :exec
 UPDATE users
-SET name = ?,
-    email = ?,
-    address = ?,
-    sex = ?,
-    birthday = ?,
-    password = ?
+SET username = ?,
+    displayname = ?    
 WHERE user_id = ?;
 
 -- name: DeleteUser :exec
-DELETE FROM users
+UPDATE users
+SET delete_at = CURRENT_TIMESTAMP
 WHERE user_id = ?;
+
+-- name: CreateUserNote :exec
+INSERT INTO user_notes (
+    user_id,
+    note_id
+) VALUES (?, ?);

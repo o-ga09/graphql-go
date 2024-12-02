@@ -1,0 +1,9 @@
+{
+  "data": {
+    "updateUser": {
+      "userId": "1",
+      "username": "admin",
+      "displayname": "管理者"
+    }
+  }
+}

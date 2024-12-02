@@ -8,6 +8,7 @@ import (
 	"github.com/o-ga09/graphql-go/internal/domain"
 	"github.com/o-ga09/graphql-go/internal/domain/repository"
 	mock "github.com/o-ga09/graphql-go/internal/domain/repository/moq"
+	"github.com/o-ga09/graphql-go/internal/service/dto"
 )
 
 func TestNewUserService(t *testing.T) {
@@ -36,10 +37,17 @@ func TestUserService_FetchUsers(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.User{
-		{ID: "1", FirstName: "firstName1", LastName: "lastName1", Email: "email1", Address: "address1", BirthDay: "birthDay1", Password: "password", Sex: 0},
-		{ID: "2", FirstName: "firstName2", LastName: "lastName2", Email: "email2", Address: "address2", BirthDay: "birthDay2", Password: "password", Sex: 1},
-		{ID: "3", FirstName: "firstName3", LastName: "lastName3", Email: "email3", Address: "address3", BirthDay: "birthDay3", Password: "password", Sex: 0},
+		{ID: "1", UserName: "userName1", DisplayName: "displayName1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "2", UserName: "userName2", DisplayName: "displayName2", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "3", UserName: "userName3", DisplayName: "displayName3", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
+
+	expected := []*dto.UserDto{
+		{ID: "1", UserName: "userName1", DisplayName: "displayName1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "2", UserName: "userName2", DisplayName: "displayName2", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "3", UserName: "userName3", DisplayName: "displayName3", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+	}
+
 	mockedUserRepository := &mock.UserRepositoryMock{
 		GetUsersFunc: func(contextMoqParam context.Context) ([]*domain.User, error) {
 			return res, nil
@@ -55,10 +63,10 @@ func TestUserService_FetchUsers(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    []*domain.User
+		want    []*dto.UserDto
 		wantErr bool
 	}{
-		{name: "TestFetchUsers", fields: fields{userRepo: mockedUserRepository}, args: args{ctx: ctx}, want: res, wantErr: false},
+		{name: "TestFetchUsers", fields: fields{userRepo: mockedUserRepository}, args: args{ctx: ctx}, want: expected, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -82,12 +90,19 @@ func TestUserService_FetchUserById(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	res := []*domain.User{
-		{ID: "1", FirstName: "firstName1", LastName: "lastName1", Email: "email1", Address: "address1", BirthDay: "birthDay1", Password: "password", Sex: 0},
-		{ID: "2", FirstName: "firstName2", LastName: "lastName2", Email: "email2", Address: "address2", BirthDay: "birthDay2", Password: "password", Sex: 1},
-		{ID: "3", FirstName: "firstName3", LastName: "lastName3", Email: "email3", Address: "address3", BirthDay: "birthDay3", Password: "password", Sex: 0},
+		{ID: "1", UserName: "userName1", DisplayName: "displayName1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "2", UserName: "userName2", DisplayName: "displayName2", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "3", UserName: "userName3", DisplayName: "displayName3", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+	}
+	expected := &dto.UserDto{
+		ID:              "1",
+		UserName:        "userName1",
+		DisplayName:     "displayName1",
+		CreatedDateTime: "2024-08-15 00:00:00",
+		UpdatedDateTime: "2024-08-15 00:00:00",
 	}
 	mockedUserRepository := &mock.UserRepositoryMock{
-		GetUserByIdFunc: func(contextMoqParam context.Context, id string) (*domain.User, error) {
+		GetUserByIDFunc: func(ctx context.Context, id string) (*domain.User, error) {
 			return res[0], nil
 		},
 	}
@@ -102,10 +117,10 @@ func TestUserService_FetchUserById(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *domain.User
+		want    *dto.UserDto
 		wantErr bool
 	}{
-		{name: "TestFetchUserById", fields: fields{userRepo: mockedUserRepository}, args: args{ctx: ctx, id: "1"}, want: res[0], wantErr: false},
+		{name: "TestFetchUserById", fields: fields{userRepo: mockedUserRepository}, args: args{ctx: ctx, id: "1"}, want: expected, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -128,17 +143,27 @@ func TestUserService_FetchUserById(t *testing.T) {
 func TestUserService_CreateUser(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	res := []*domain.User{
-		{ID: "1", FirstName: "firstName1", LastName: "lastName1", Email: "email1", Address: "address1", BirthDay: "birthDay1", Password: "password", Sex: 0},
-		{ID: "2", FirstName: "firstName2", LastName: "lastName2", Email: "email2", Address: "address2", BirthDay: "birthDay2", Password: "password", Sex: 1},
-		{ID: "3", FirstName: "firstName3", LastName: "lastName3", Email: "email3", Address: "address3", BirthDay: "birthDay3", Password: "password", Sex: 0},
+	mockres := []*domain.User{
+		{ID: "1", UserName: "userName1", DisplayName: "displayName1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "2", UserName: "userName2", DisplayName: "displayName2", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "3", UserName: "userName3", DisplayName: "displayName3", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+	}
+	argUser := []*dto.UserReqsutDto{
+		{UserId: "1", UserName: "userName1", DisplayName: "displayName1"},
+		{UserId: "2", UserName: "userName2", DisplayName: "displayName2"},
+		{UserId: "3", UserName: "userName3", DisplayName: "displayName3"},
+	}
+	expected := []*dto.UserDto{
+		{ID: "1", UserName: "userName1", DisplayName: "displayName1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "2", UserName: "userName2", DisplayName: "displayName2", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "3", UserName: "userName3", DisplayName: "displayName3", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 	mockedUserRepository := &mock.UserRepositoryMock{
-		CreateUserFunc: func(contextMoqParam context.Context, user *domain.User) error {
+		SaveFunc: func(ctx context.Context, user *domain.User) error {
 			return nil
 		},
-		GetUserByIdFunc: func(contextMoqParam context.Context, id string) (*domain.User, error) {
-			return res[0], nil
+		GetUserByIDFunc: func(ctx context.Context, id string) (*domain.User, error) {
+			return mockres[0], nil
 		},
 	}
 	type fields struct {
@@ -146,16 +171,16 @@ func TestUserService_CreateUser(t *testing.T) {
 	}
 	type args struct {
 		ctx  context.Context
-		user *domain.User
+		user *dto.UserReqsutDto
 	}
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		want    *domain.User
+		want    *dto.UserDto
 		wantErr bool
 	}{
-		{name: "TestCreateUser", fields: fields{userRepo: mockedUserRepository}, args: args{ctx: ctx, user: res[0]}, want: res[0], wantErr: false},
+		{name: "TestCreateUser", fields: fields{userRepo: mockedUserRepository}, args: args{ctx: ctx, user: argUser[0]}, want: expected[0], wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -163,13 +188,10 @@ func TestUserService_CreateUser(t *testing.T) {
 			u := &UserService{
 				userRepo: tt.fields.userRepo,
 			}
-			got, err := u.CreateUser(tt.args.ctx, tt.args.user)
+			err := u.CreateUser(tt.args.ctx, tt.args.user)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UserService.CreateUser() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("UserService.CreateUser() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -178,17 +200,27 @@ func TestUserService_CreateUser(t *testing.T) {
 func TestUserService_UpdateUserById(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	res := []*domain.User{
-		{ID: "1", FirstName: "firstName1", LastName: "lastName1", Email: "email1", Address: "address1", BirthDay: "birthDay1", Password: "password", Sex: 0},
-		{ID: "2", FirstName: "firstName2", LastName: "lastName2", Email: "email2", Address: "address2", BirthDay: "birthDay2", Password: "password", Sex: 1},
-		{ID: "3", FirstName: "firstName3", LastName: "lastName3", Email: "email3", Address: "address3", BirthDay: "birthDay3", Password: "password", Sex: 0},
+	mockres := []*domain.User{
+		{ID: "1", UserName: "userName1", DisplayName: "displayName1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "2", UserName: "userName2", DisplayName: "displayName2", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "3", UserName: "userName3", DisplayName: "displayName3", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+	}
+	argUser := []*dto.UserReqsutDto{
+		{UserId: "1", UserName: "userName1", DisplayName: "displayName1"},
+		{UserId: "2", UserName: "userName2", DisplayName: "displayName2"},
+		{UserId: "3", UserName: "userName3", DisplayName: "displayName3"},
+	}
+	expected := []*dto.UserDto{
+		{ID: "1", UserName: "userName1", DisplayName: "displayName1", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "2", UserName: "userName2", DisplayName: "displayName2", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+		{ID: "3", UserName: "userName3", DisplayName: "displayName3", CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
 	}
 	mockedUserRepository := &mock.UserRepositoryMock{
-		UpdateUserByIdFunc: func(contextMoqParam context.Context, id string, user *domain.User) error {
+		SaveFunc: func(ctx context.Context, user *domain.User) error {
 			return nil
 		},
-		GetUserByIdFunc: func(contextMoqParam context.Context, id string) (*domain.User, error) {
-			return res[0], nil
+		GetUserByIDFunc: func(ctx context.Context, id string) (*domain.User, error) {
+			return mockres[0], nil
 		},
 	}
 	type fields struct {
@@ -197,16 +229,16 @@ func TestUserService_UpdateUserById(t *testing.T) {
 	type args struct {
 		ctx  context.Context
 		id   string
-		user *domain.User
+		user *dto.UserReqsutDto
 	}
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		want    *domain.User
+		want    *dto.UserDto
 		wantErr bool
 	}{
-		{name: "TestUpdateUserById", fields: fields{userRepo: mockedUserRepository}, args: args{ctx: ctx, id: "1", user: res[0]}, want: res[0], wantErr: false},
+		{name: "TestUpdateUserById", fields: fields{userRepo: mockedUserRepository}, args: args{ctx: ctx, id: "1", user: argUser[0]}, want: expected[0], wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -214,13 +246,10 @@ func TestUserService_UpdateUserById(t *testing.T) {
 			u := &UserService{
 				userRepo: tt.fields.userRepo,
 			}
-			got, err := u.UpdateUserById(tt.args.ctx, tt.args.id, tt.args.user)
+			err := u.UpdateUserById(tt.args.ctx, tt.args.user)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UserService.UpdateUserById() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("UserService.UpdateUserById() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -230,7 +259,7 @@ func TestUserService_DeleteUserById(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	mockedUserRepository := &mock.UserRepositoryMock{
-		DeleteUserByIdFunc: func(contextMoqParam context.Context, id string) error {
+		DeleteFunc: func(ctx context.Context, id string) error {
 			return nil
 		},
 	}

@@ -1,0 +1,16 @@
+{
+  "data": {
+    "getNoteById": {
+      "note": {
+        "noteId": "1",
+        "title": "First Note",
+        "content": "This is the first note"
+      },
+      "author": {
+        "userId": "1",
+        "username": "admin",
+        "displayname": "admin"
+      }
+    }
+  }
+}

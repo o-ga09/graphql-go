@@ -1,0 +1,3 @@
+mutation {
+  deleteNote(noteId: "5")
+}
