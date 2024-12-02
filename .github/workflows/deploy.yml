@@ -37,7 +37,7 @@ jobs:
 
       - name: Build a docker image
         run: |
-          docker build --platform linux/amd64 -t ${{ env.IMAGE }} --target production ./
+          docker build --platform linux/amd64 -t ${{ env.IMAGE }} --target deploy ./
         env:
           IMAGE: asia-northeast1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
 

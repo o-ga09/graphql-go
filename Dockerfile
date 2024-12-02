@@ -11,7 +11,7 @@ RUN go build -trimpath -ldflags "-w -s" -o main ./service/user/main.go
 
 #-----------------------------------------------
 #API デプロイ用コンアテナ
-FROM centos:centos7 as deploy-api
+FROM centos:centos7 as deploy
 
 RUN yum -y update
 
