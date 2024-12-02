@@ -7,15 +7,15 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
-RUN go build -trimpath -ldflags "-w -s" -o main ./service/user/main.go
+RUN go build -trimpath -ldflags "-w -s" -o main ./cmd/main.go
 
 #-----------------------------------------------
 #API デプロイ用コンアテナ
-FROM centos:centos7 as deploy
+FROM ubuntu:22.04 as deploy
 
-RUN yum -y update
+RUN apt update
 
-EXPOSE "8081"
+EXPOSE "8080"
 
 COPY --from=deploy-builder /app/main .
 
