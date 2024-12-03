@@ -28,15 +28,15 @@ func main() {
 		port = defaultPort
 	}
 
-	conn := db.Connect(ctx)
-	if conn == nil {
-		slog.Log(ctx, logger.SeverityError, "failed to connect db")
+	conn, err := db.Connect(ctx)
+	if err != nil {
+		slog.Log(ctx, logger.SeverityError, "failed to connect db", "err msg", err.Error())
 		return
 	}
 
 	result, err := conn.Query("SELECT 1")
 	if err != nil {
-		slog.Log(ctx, logger.SeverityError, "failed to ping db")
+		slog.Log(ctx, logger.SeverityError, "failed to ping db", "err msg", err.Error())
 		return
 	}
 	defer result.Close()

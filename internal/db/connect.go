@@ -10,12 +10,12 @@ import (
 	"github.com/o-ga09/graphql-go/pkg/logger"
 )
 
-func Connect(ctx context.Context) *sql.DB {
+func Connect(ctx context.Context) (*sql.DB, error) {
 	dsn := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	slog.Log(ctx, logger.SeverityInfo, "db connected")
-	return db
+	return db, nil
 }
