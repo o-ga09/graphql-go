@@ -1,12 +1,12 @@
 -- name: GetNote :one
 SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.note_id = ? AND delete_at IS NULL LIMIT 1;
+WHERE user_notes.note_id = ? AND deleted_at IS NULL LIMIT 1;
 
 -- name: GetNotes :many
 SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.user_id = ? AND delete_at IS NULL
+WHERE user_notes.user_id = ? AND deleted_at IS NULL
 ORDER BY created_at DESC;
 
 -- name: CreateNote :execresult
@@ -26,7 +26,7 @@ WHERE note_id = ?;
 
 -- name: DeleteNote :exec
 UPDATE notes
-SET delete_at = CURRENT_TIMESTAMP
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE note_id = ?;
 
 -- name: CreateUser :execresult
@@ -38,11 +38,11 @@ INSERT INTO users (
 
 -- name: GetUser :one
 SELECT id, user_id, username, displayname, created_at, updated_at FROM users
-WHERE user_id = ? AND delete_at IS NULL LIMIT 1;
+WHERE user_id = ? AND deleted_at IS NULL LIMIT 1;
 
 -- name: GetUsers :many
 SELECT id, user_id, username, displayname, created_at, updated_at FROM users
-WHERE delete_at IS NULL
+WHERE deleted_at IS NULL
 ORDER BY created_at DESC;
 
 -- name: UpdateUser :exec
@@ -53,7 +53,7 @@ WHERE user_id = ?;
 
 -- name: DeleteUser :exec
 UPDATE users
-SET delete_at = CURRENT_TIMESTAMP
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE user_id = ?;
 
 -- name: CreateUserNote :exec

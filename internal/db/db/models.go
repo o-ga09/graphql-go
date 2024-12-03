@@ -16,7 +16,7 @@ type Note struct {
 	Content   string
 	CreatedAt sql.NullTime
 	UpdatedAt sql.NullTime
-	DeleteAt  sql.NullTime
+	DeletedAt sql.NullTime
 }
 
 type User struct {
@@ -26,7 +26,7 @@ type User struct {
 	Displayname string
 	CreatedAt   sql.NullTime
 	UpdatedAt   sql.NullTime
-	DeleteAt    sql.NullTime
+	DeletedAt   sql.NullTime
 }
 
 type UserNote struct {

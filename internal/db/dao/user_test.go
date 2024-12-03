@@ -61,7 +61,7 @@ func Test_userDao_GetUsers(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
 	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
-	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE delete_at IS NULL ORDER BY created_at DESC").WillReturnRows(rows)
+	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC").WillReturnRows(rows)
 
 	type fields struct {
 		query *db.Queries
@@ -119,7 +119,7 @@ func Test_userDao_GetUserById(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
 	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
-	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE user_id = \\? AND delete_at IS NULL LIMIT 1").WithArgs("1").WillReturnRows(rows)
+	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE user_id = \\? AND deleted_at IS NULL LIMIT 1").WithArgs("1").WillReturnRows(rows)
 
 	type fields struct {
 		query *db.Queries
@@ -220,7 +220,7 @@ func Test_userDao_Save_Update(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
 	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
-	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE user_id = \\? AND delete_at IS NULL LIMIT 1").WithArgs("1").WillReturnRows(rows)
+	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE user_id = \\? AND deleted_at IS NULL LIMIT 1").WithArgs("1").WillReturnRows(rows)
 
 	arg := db.UpdateUserParams{
 		Username:    "name1",

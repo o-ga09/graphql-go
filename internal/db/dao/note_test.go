@@ -59,7 +59,7 @@ func Test_noteDao_GetNotes(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "notes.note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
 	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
-	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.user_id = \? AND delete_at IS NULL ORDER BY created_at DESC`).WillReturnRows(rows)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.user_id = \? AND deleted_at IS NULL ORDER BY created_at DESC`).WillReturnRows(rows)
 
 	if err != nil {
 		t.Fatal(err)
@@ -122,7 +122,7 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
 	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
-	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? AND delete_at IS NULL LIMIT 1`).WithArgs("1").WillReturnRows(rows)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? AND deleted_at IS NULL LIMIT 1`).WithArgs("1").WillReturnRows(rows)
 
 	type fields struct {
 		query *db.Queries
@@ -224,7 +224,7 @@ func Test_noteDao_Save_Update(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "notes.note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
 	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
-	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? AND delete_at IS NULL LIMIT 1`).WithArgs("1").WillReturnRows(rows)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? AND deleted_at IS NULL LIMIT 1`).WithArgs("1").WillReturnRows(rows)
 
 	arg := db.UpdateNoteParams{
 		NoteID:  "1",

@@ -72,7 +72,7 @@ func (q *Queries) CreateUserNote(ctx context.Context, arg CreateUserNoteParams) 
 
 const deleteNote = `-- name: DeleteNote :exec
 UPDATE notes
-SET delete_at = CURRENT_TIMESTAMP
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE note_id = ?
 `
 
@@ -83,7 +83,7 @@ func (q *Queries) DeleteNote(ctx context.Context, noteID string) error {
 
 const deleteUser = `-- name: DeleteUser :exec
 UPDATE users
-SET delete_at = CURRENT_TIMESTAMP
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE user_id = ?
 `
 
@@ -95,7 +95,7 @@ func (q *Queries) DeleteUser(ctx context.Context, userID string) error {
 const getNote = `-- name: GetNote :one
 SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.note_id = ? AND delete_at IS NULL LIMIT 1
+WHERE user_notes.note_id = ? AND deleted_at IS NULL LIMIT 1
 `
 
 type GetNoteRow struct {
@@ -128,7 +128,7 @@ func (q *Queries) GetNote(ctx context.Context, noteID string) (GetNoteRow, error
 const getNotes = `-- name: GetNotes :many
 SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.user_id = ? AND delete_at IS NULL
+WHERE user_notes.user_id = ? AND deleted_at IS NULL
 ORDER BY created_at DESC
 `
 
@@ -177,7 +177,7 @@ func (q *Queries) GetNotes(ctx context.Context, userID string) ([]GetNotesRow, e
 
 const getUser = `-- name: GetUser :one
 SELECT id, user_id, username, displayname, created_at, updated_at FROM users
-WHERE user_id = ? AND delete_at IS NULL LIMIT 1
+WHERE user_id = ? AND deleted_at IS NULL LIMIT 1
 `
 
 type GetUserRow struct {
@@ -205,7 +205,7 @@ func (q *Queries) GetUser(ctx context.Context, userID string) (GetUserRow, error
 
 const getUsers = `-- name: GetUsers :many
 SELECT id, user_id, username, displayname, created_at, updated_at FROM users
-WHERE delete_at IS NULL
+WHERE deleted_at IS NULL
 ORDER BY created_at DESC
 `
 
