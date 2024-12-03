@@ -50,7 +50,7 @@ func Test_E2E_User(t *testing.T) {
 		},
 	}
 
-	conn := db.Connect(ctx)
+	conn, _ := db.Connect(ctx)
 	noteRepo := dao.NewNoteDao(conn)
 	userRepo := dao.NewUserDao(conn)
 	noteService := service.NewNoteService(noteRepo)
@@ -112,7 +112,7 @@ func Test_E2E_Note(t *testing.T) {
 		},
 	}
 
-	conn := db.Connect(ctx)
+	conn, _ := db.Connect(ctx)
 	noteRepo := dao.NewNoteDao(conn)
 	userRepo := dao.NewUserDao(conn)
 	noteService := service.NewNoteService(noteRepo)
