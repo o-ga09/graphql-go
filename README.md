@@ -1,5 +1,7 @@
 # GraphQL を実装する
 
+[![Deploy](https://github.com/o-ga09/graphql-go/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/o-ga09/graphql-go/actions/workflows/deploy.yml)[![lint and test](https://github.com/o-ga09/graphql-go/actions/workflows/lint_and_test.yml/badge.svg)](https://github.com/o-ga09/graphql-go/actions/workflows/lint_and_test.yml)
+
 [Goで学ぶGraphQLサーバーサイド入門](https://zenn.dev/hsaki/books/golang-graphql)
 
 ## 実行
