@@ -16,6 +16,7 @@ import (
 	"github.com/o-ga09/graphql-go/internal/db/dao"
 	"github.com/o-ga09/graphql-go/internal/service"
 	"github.com/o-ga09/graphql-go/pkg/logger"
+	"github.com/o-ga09/graphql-go/pkg/middleware"
 )
 
 const defaultPort = "8080"
@@ -53,7 +54,7 @@ func main() {
 	}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", middleware.CorsMiddleware(srv))
 
 	slog.Log(ctx, logger.SeverityInfo, fmt.Sprintf("connect to http://localhost:%s/ for GraphQL playground", port))
 	log.Fatal(http.ListenAndServe(":"+port, nil))
