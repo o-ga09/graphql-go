@@ -28,6 +28,7 @@ func init() {
 }
 
 func Test_E2E_User(t *testing.T) {
+	t.Setenv("ENV", "test")
 	ctx := context.Background()
 	testutil.SetUpMySQL(t)
 	tests := map[string]struct {
@@ -90,6 +91,7 @@ func Test_E2E_User(t *testing.T) {
 }
 
 func Test_E2E_Note(t *testing.T) {
+	t.Setenv("ENV", "test")
 	testutil.SetUpMySQL(t)
 	ctx := context.Background()
 	tests := map[string]struct {
