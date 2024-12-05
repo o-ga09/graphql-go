@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/o-ga09/graphql-go/internal/db/db"
@@ -52,13 +51,13 @@ func Test_noteDao_GetNotes(t *testing.T) {
 		Title:     "title1",
 		Tags:      "tags1,tags2,tags3",
 		Content:   "content1",
-		CreatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-		UpdatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		CreatedAt: sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
+		UpdatedAt: sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
 		UserID:    "1",
 	}
 
 	rows := sqlmock.NewRows([]string{"id", "notes.note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
-	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
+	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.String, expected.UpdatedAt.String, expected.UserID)
 	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.user_id = \? AND deleted_at IS NULL ORDER BY created_at DESC`).WillReturnRows(rows)
 
 	if err != nil {
@@ -115,13 +114,13 @@ func Test_noteDao_GetNoteByID(t *testing.T) {
 		Title:     "title1",
 		Tags:      "tags1,tags2,tags3",
 		Content:   "content1",
-		CreatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-		UpdatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		CreatedAt: sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
+		UpdatedAt: sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
 		UserID:    "1",
 	}
 
 	rows := sqlmock.NewRows([]string{"id", "note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
-	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
+	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.String, expected.UpdatedAt.String, expected.UserID)
 	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? AND deleted_at IS NULL LIMIT 1`).WithArgs("1").WillReturnRows(rows)
 
 	type fields struct {
@@ -217,13 +216,13 @@ func Test_noteDao_Save_Update(t *testing.T) {
 		Title:     "title1",
 		Tags:      "tags1,tags2,tags3",
 		Content:   "content1",
-		CreatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-		UpdatedAt: sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		CreatedAt: sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
+		UpdatedAt: sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
 		UserID:    "1",
 	}
 
 	rows := sqlmock.NewRows([]string{"id", "notes.note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
-	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.Time, expected.UpdatedAt.Time, expected.UserID)
+	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.String, expected.UpdatedAt.String, expected.UserID)
 	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE user_notes.note_id = \? AND deleted_at IS NULL LIMIT 1`).WithArgs("1").WillReturnRows(rows)
 
 	arg := db.UpdateNoteParams{

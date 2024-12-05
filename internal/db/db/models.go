@@ -14,9 +14,9 @@ type Note struct {
 	Title     string
 	Tags      string
 	Content   string
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
-	DeletedAt sql.NullTime
+	CreatedAt sql.NullString
+	UpdatedAt sql.NullString
+	DeletedAt sql.NullString
 }
 
 type User struct {
@@ -24,9 +24,9 @@ type User struct {
 	UserID      string
 	Username    string
 	Displayname string
-	CreatedAt   sql.NullTime
-	UpdatedAt   sql.NullTime
-	DeletedAt   sql.NullTime
+	CreatedAt   sql.NullString
+	UpdatedAt   sql.NullString
+	DeletedAt   sql.NullString
 }
 
 type UserNote struct {

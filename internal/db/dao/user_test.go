@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/o-ga09/graphql-go/internal/db/db"
@@ -55,12 +54,12 @@ func Test_userDao_GetUsers(t *testing.T) {
 		UserID:      "1",
 		Username:    "name1",
 		Displayname: "name1",
-		CreatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-		UpdatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		CreatedAt:   sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
+		UpdatedAt:   sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
 	}
 
 	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
-	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
+	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.String, expected.UpdatedAt.String)
 	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC").WillReturnRows(rows)
 
 	type fields struct {
@@ -113,12 +112,12 @@ func Test_userDao_GetUserById(t *testing.T) {
 		UserID:      "1",
 		Username:    "name1",
 		Displayname: "name1",
-		CreatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-		UpdatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		CreatedAt:   sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
+		UpdatedAt:   sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
 	}
 
 	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
-	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
+	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.String, expected.UpdatedAt.String)
 	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE user_id = \\? AND deleted_at IS NULL LIMIT 1").WithArgs("1").WillReturnRows(rows)
 
 	type fields struct {
@@ -214,12 +213,12 @@ func Test_userDao_Save_Update(t *testing.T) {
 		UserID:      "1",
 		Username:    "name1",
 		Displayname: "name1",
-		CreatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-		UpdatedAt:   sql.NullTime{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		CreatedAt:   sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
+		UpdatedAt:   sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
 	}
 
 	rows := sqlmock.NewRows([]string{"id", "user_id", "username", "displayname", "created_at", "updated_at"})
-	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.Time, expected.UpdatedAt.Time)
+	rows.AddRow(expected.ID, expected.UserID, expected.Username, expected.Displayname, expected.CreatedAt.String, expected.UpdatedAt.String)
 	mock.ExpectQuery("SELECT id, user_id, username, displayname, created_at, updated_at FROM users WHERE user_id = \\? AND deleted_at IS NULL LIMIT 1").WithArgs("1").WillReturnRows(rows)
 
 	arg := db.UpdateUserParams{

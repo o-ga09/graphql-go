@@ -3,9 +3,9 @@ CREATE TABLE users (
   user_id varchar(255) UNIQUE NOT NULL,
   username varchar(255) NOT NULL,
   displayname varchar(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP DEFAULT NULL,
+  created_at varchar(16) DEFAULT CURRENT_TIMESTAMP,
+  updated_at varchar(16) DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at varchar(16) DEFAULT NULL,
   PRIMARY KEY (id)
 );
 
@@ -15,9 +15,9 @@ CREATE TABLE notes (
   title varchar(255) NOT NULL,
   tags varchar(255) NOT NULL,
   content text NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP DEFAULT NULL,
+  created_at varchar(16) DEFAULT CURRENT_TIMESTAMP,
+  updated_at varchar(16) DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at varchar(16) DEFAULT NULL,
   PRIMARY KEY (id)
 );
 

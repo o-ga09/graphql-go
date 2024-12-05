@@ -27,8 +27,8 @@ func (u *userDao) GetUsers(ctx context.Context) ([]*domain.User, error) {
 	}
 	res := []*domain.User{}
 	for _, user := range users {
-		createdDateTime := strings.Replace(user.CreatedAt.Time.String(), " +0000 UTC", "", 1)
-		updatedDateTime := strings.Replace(user.UpdatedAt.Time.String(), " +0000 UTC", "", 1)
+		createdDateTime := strings.Replace(user.CreatedAt.String, " +0000 UTC", "", 1)
+		updatedDateTime := strings.Replace(user.UpdatedAt.String, " +0000 UTC", "", 1)
 		r, err := domain.ReconstractUser(user.UserID, user.Username, user.Displayname, createdDateTime, updatedDateTime)
 		if err != nil {
 			return nil, err
@@ -43,8 +43,8 @@ func (u *userDao) GetUserByID(ctx context.Context, id string) (*domain.User, err
 	if err != nil {
 		return nil, err
 	}
-	createdDateTime := strings.Replace(user.CreatedAt.Time.String(), " +0000 UTC", "", 1)
-	updatedDateTime := strings.Replace(user.UpdatedAt.Time.String(), " +0000 UTC", "", 1)
+	createdDateTime := strings.Replace(user.CreatedAt.String, " +0000 UTC", "", 1)
+	updatedDateTime := strings.Replace(user.UpdatedAt.String, " +0000 UTC", "", 1)
 	return domain.ReconstractUser(user.UserID, user.Username, user.Displayname, createdDateTime, updatedDateTime)
 }
 

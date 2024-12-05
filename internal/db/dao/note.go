@@ -28,8 +28,8 @@ func (n *noteDao) GetNotes(ctx context.Context, userId string) ([]*domain.Note, 
 	}
 	res := []*domain.Note{}
 	for _, note := range notes {
-		createdDateTime := strings.Replace(note.CreatedAt.Time.String(), " +0000 UTC", "", 1)
-		updatedDateTime := strings.Replace(note.UpdatedAt.Time.String(), " +0000 UTC", "", 1)
+		createdDateTime := strings.Replace(note.CreatedAt.String, " +0000 UTC", "", 1)
+		updatedDateTime := strings.Replace(note.UpdatedAt.String, " +0000 UTC", "", 1)
 		log.Println(createdDateTime)
 		r, err := domain.ReConstractNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, createdDateTime, updatedDateTime)
 		if err != nil {
@@ -43,8 +43,8 @@ func (n *noteDao) GetNotes(ctx context.Context, userId string) ([]*domain.Note, 
 
 func (n *noteDao) GetNoteByID(ctx context.Context, id string) (*domain.Note, error) {
 	note, _ := n.query.GetNote(ctx, id)
-	createdDateTime := strings.Replace(note.CreatedAt.Time.String(), " +0000 UTC", "", 1)
-	updatedDateTime := strings.Replace(note.UpdatedAt.Time.String(), " +0000 UTC", "", 1)
+	createdDateTime := strings.Replace(note.CreatedAt.String, " +0000 UTC", "", 1)
+	updatedDateTime := strings.Replace(note.UpdatedAt.String, " +0000 UTC", "", 1)
 	return domain.ReConstractNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, createdDateTime, updatedDateTime)
 }
 

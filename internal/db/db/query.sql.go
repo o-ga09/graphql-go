@@ -104,8 +104,8 @@ type GetNoteRow struct {
 	Title     string
 	Tags      string
 	Content   string
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
+	CreatedAt sql.NullString
+	UpdatedAt sql.NullString
 	UserID    string
 }
 
@@ -138,8 +138,8 @@ type GetNotesRow struct {
 	Title     string
 	Tags      string
 	Content   string
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
+	CreatedAt sql.NullString
+	UpdatedAt sql.NullString
 	UserID    string
 }
 
@@ -185,8 +185,8 @@ type GetUserRow struct {
 	UserID      string
 	Username    string
 	Displayname string
-	CreatedAt   sql.NullTime
-	UpdatedAt   sql.NullTime
+	CreatedAt   sql.NullString
+	UpdatedAt   sql.NullString
 }
 
 func (q *Queries) GetUser(ctx context.Context, userID string) (GetUserRow, error) {
@@ -214,8 +214,8 @@ type GetUsersRow struct {
 	UserID      string
 	Username    string
 	Displayname string
-	CreatedAt   sql.NullTime
-	UpdatedAt   sql.NullTime
+	CreatedAt   sql.NullString
+	UpdatedAt   sql.NullString
 }
 
 func (q *Queries) GetUsers(ctx context.Context) ([]GetUsersRow, error) {
