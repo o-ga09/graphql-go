@@ -27,10 +27,14 @@ func init() {
 	flag.BoolVar(&flagUpdate, "update", false, "update golden files")
 }
 
+func resetDatabase(t *testing.T) {
+	t.Helper()
+	testutil.SetUpMySQL(t)
+}
+
 func Test_E2E_User(t *testing.T) {
 	t.Setenv("ENV", "test")
 	ctx := context.Background()
-	testutil.SetUpMySQL(t)
 	tests := map[string]struct {
 		statusCode int
 	}{
@@ -51,21 +55,22 @@ func Test_E2E_User(t *testing.T) {
 		},
 	}
 
-	conn, _ := db.Connect(ctx)
-	noteRepo := dao.NewNoteDao(conn)
-	userRepo := dao.NewUserDao(conn)
-	noteService := service.NewNoteService(noteRepo)
-	userService := service.NewUserService(userRepo)
-	srv := httptest.NewServer(handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		NoteService: *noteService,
-		UserService: *userService,
-	}})),
-	)
-	t.Cleanup(func() { srv.Close() })
-
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
+			resetDatabase(t)
+
+			conn, _ := db.Connect(ctx)
+			noteRepo := dao.NewNoteDao(conn)
+			userRepo := dao.NewUserDao(conn)
+			noteService := service.NewNoteService(noteRepo)
+			userService := service.NewUserService(userRepo)
+			srv := httptest.NewServer(handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+				NoteService: *noteService,
+				UserService: *userService,
+			}})),
+			)
+			t.Cleanup(func() { srv.Close() })
+
 			reqBody := testutil.GetRequestBody(t, goldenDir, "user/"+name+"In.gpl")
 			req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, srv.URL, reqBody)
 			if err != nil {
@@ -92,7 +97,6 @@ func Test_E2E_User(t *testing.T) {
 
 func Test_E2E_Note(t *testing.T) {
 	t.Setenv("ENV", "test")
-	testutil.SetUpMySQL(t)
 	ctx := context.Background()
 	tests := map[string]struct {
 		statusCode int
@@ -117,21 +121,22 @@ func Test_E2E_Note(t *testing.T) {
 		},
 	}
 
-	conn, _ := db.Connect(ctx)
-	noteRepo := dao.NewNoteDao(conn)
-	userRepo := dao.NewUserDao(conn)
-	noteService := service.NewNoteService(noteRepo)
-	userService := service.NewUserService(userRepo)
-	srv := httptest.NewServer(handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		NoteService: *noteService,
-		UserService: *userService,
-	}})),
-	)
-	t.Cleanup(func() { srv.Close() })
-
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
+			resetDatabase(t)
+
+			conn, _ := db.Connect(ctx)
+			noteRepo := dao.NewNoteDao(conn)
+			userRepo := dao.NewUserDao(conn)
+			noteService := service.NewNoteService(noteRepo)
+			userService := service.NewUserService(userRepo)
+			srv := httptest.NewServer(handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+				NoteService: *noteService,
+				UserService: *userService,
+			}})),
+			)
+			t.Cleanup(func() { srv.Close() })
+
 			reqBody := testutil.GetRequestBody(t, goldenDir, "note/"+name+"In.gpl")
 			req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, srv.URL, reqBody)
 			if err != nil {

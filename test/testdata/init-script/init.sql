@@ -29,6 +29,10 @@ CREATE TABLE user_notes (
   FOREIGN KEY (note_id) REFERENCES notes (note_id)
 );
 
+DELETE FROM user_notes;
+DELETE FROM notes;
+DELETE FROM users;
+
 INSERT INTO users (user_id, username, displayname) VALUES ('1', 'admin', 'admin');
 INSERT INTO users (user_id, username, displayname) VALUES ('2', 'user', 'user');
 INSERT INTO users (user_id, username, displayname) VALUES ('3', 'user3', 'user3');
