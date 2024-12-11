@@ -9,6 +9,12 @@ JOIN user_notes ON notes.note_id = user_notes.note_id
 WHERE user_notes.user_id = ? AND deleted_at IS NULL
 ORDER BY created_at DESC;
 
+-- name: GetNoteAll :many
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
+JOIN user_notes ON notes.note_id = user_notes.note_id
+WHERE deleted_at IS NULL
+ORDER BY created_at DESC;
+
 -- name: CreateNote :execresult
 INSERT INTO notes (
     note_id,

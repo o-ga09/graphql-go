@@ -125,6 +125,56 @@ func (q *Queries) GetNote(ctx context.Context, noteID string) (GetNoteRow, error
 	return i, err
 }
 
+const getNoteAll = `-- name: GetNoteAll :many
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
+JOIN user_notes ON notes.note_id = user_notes.note_id
+WHERE deleted_at IS NULL
+ORDER BY created_at DESC
+`
+
+type GetNoteAllRow struct {
+	ID        int64
+	NoteID    string
+	Title     string
+	Tags      string
+	Content   string
+	CreatedAt sql.NullString
+	UpdatedAt sql.NullString
+	UserID    string
+}
+
+func (q *Queries) GetNoteAll(ctx context.Context) ([]GetNoteAllRow, error) {
+	rows, err := q.db.QueryContext(ctx, getNoteAll)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetNoteAllRow
+	for rows.Next() {
+		var i GetNoteAllRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.NoteID,
+			&i.Title,
+			&i.Tags,
+			&i.Content,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getNotes = `-- name: GetNotes :many
 SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id

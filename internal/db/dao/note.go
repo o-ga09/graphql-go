@@ -21,7 +21,7 @@ func NewNoteDao(d *sql.DB) *noteDao {
 	}
 }
 
-func (n *noteDao) GetNotes(ctx context.Context, userId string) ([]*domain.Note, error) {
+func (n *noteDao) GetNoteByUserId(ctx context.Context, userId string) ([]*domain.Note, error) {
 	notes, err := n.query.GetNotes(ctx, userId)
 	if err != nil {
 		return nil, err
@@ -38,6 +38,24 @@ func (n *noteDao) GetNotes(ctx context.Context, userId string) ([]*domain.Note, 
 		res = append(res, r)
 	}
 	log.Println(res[0].CreatedDateTime)
+	return res, nil
+}
+
+func (n *noteDao) GetNoteAll(ctx context.Context) ([]*domain.Note, error) {
+	notes, err := n.query.GetNoteAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := []*domain.Note{}
+	for _, note := range notes {
+		createdDateTime := strings.Replace(note.CreatedAt.String, " +0000 UTC", "", 1)
+		updatedDateTime := strings.Replace(note.UpdatedAt.String, " +0000 UTC", "", 1)
+		r, err := domain.ReConstractNote(note.NoteID, note.UserID, note.Title, note.Content, note.Tags, createdDateTime, updatedDateTime)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, r)
+	}
 	return res, nil
 }
 

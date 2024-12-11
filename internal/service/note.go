@@ -21,8 +21,30 @@ func NewNoteService(noteRepo repository.NoteRepository) *NoteService {
 	}
 }
 
-func (n *NoteService) FetchNotes(ctx context.Context, userId string) ([]*dto.NoteDto, error) {
-	notes, err := n.noteRepo.GetNotes(ctx, userId)
+func (n *NoteService) FetchNotesByUserId(ctx context.Context, userId string) ([]*dto.NoteDto, error) {
+	notes, err := n.noteRepo.GetNoteByUserId(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	res := []*dto.NoteDto{}
+	for _, note := range notes {
+		r := &dto.NoteDto{
+			ID:              note.ID,
+			UserId:          note.UserID,
+			Title:           note.Title,
+			Content:         note.Content,
+			Tags:            note.Tags,
+			CreatedDateTime: note.CreatedDateTime,
+			UpdatedDateTime: note.UpdatedDateTime,
+		}
+		res = append(res, r)
+	}
+	return res, nil
+}
+
+func (n *NoteService) FetchNoteAll(ctx context.Context) ([]*dto.NoteDto, error) {
+	notes, err := n.noteRepo.GetNoteAll(ctx)
 	if err != nil {
 		return nil, err
 	}

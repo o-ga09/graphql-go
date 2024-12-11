@@ -45,7 +45,7 @@ func TestNoteService_FetchNotes(t *testing.T) {
 		{ID: "3", Title: "title3", Content: "content3", Tags: []string{"tag1", "tag2", "tag3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00", UserId: "1"},
 	}
 	mockedNoteRepository := &mock.NoteRepositoryMock{
-		GetNotesFunc: func(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
+		GetNoteByUserIdFunc: func(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
 			return res, nil
 		},
 	}
@@ -71,7 +71,7 @@ func TestNoteService_FetchNotes(t *testing.T) {
 			n := &NoteService{
 				noteRepo: tt.fields.noteRepo,
 			}
-			got, err := n.FetchNotes(tt.args.ctx, tt.args.userId)
+			got, err := n.FetchNotesByUserId(tt.args.ctx, tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NoteService.FetchNotes() error = %v, wantErr %v", err, tt.wantErr)
 				return

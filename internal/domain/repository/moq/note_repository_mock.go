@@ -23,11 +23,14 @@ var _ repository.NoteRepository = &NoteRepositoryMock{}
 //			DeleteFunc: func(ctx context.Context, id string) error {
 //				panic("mock out the Delete method")
 //			},
+//			GetNoteAllFunc: func(contextMoqParam context.Context) ([]*domain.Note, error) {
+//				panic("mock out the GetNoteAll method")
+//			},
 //			GetNoteByIDFunc: func(ctx context.Context, id string) (*domain.Note, error) {
 //				panic("mock out the GetNoteByID method")
 //			},
-//			GetNotesFunc: func(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
-//				panic("mock out the GetNotes method")
+//			GetNoteByUserIdFunc: func(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
+//				panic("mock out the GetNoteByUserId method")
 //			},
 //			SaveFunc: func(ctx context.Context, note *domain.Note) error {
 //				panic("mock out the Save method")
@@ -42,11 +45,14 @@ type NoteRepositoryMock struct {
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(ctx context.Context, id string) error
 
+	// GetNoteAllFunc mocks the GetNoteAll method.
+	GetNoteAllFunc func(contextMoqParam context.Context) ([]*domain.Note, error)
+
 	// GetNoteByIDFunc mocks the GetNoteByID method.
 	GetNoteByIDFunc func(ctx context.Context, id string) (*domain.Note, error)
 
-	// GetNotesFunc mocks the GetNotes method.
-	GetNotesFunc func(contextMoqParam context.Context, s string) ([]*domain.Note, error)
+	// GetNoteByUserIdFunc mocks the GetNoteByUserId method.
+	GetNoteByUserIdFunc func(contextMoqParam context.Context, s string) ([]*domain.Note, error)
 
 	// SaveFunc mocks the Save method.
 	SaveFunc func(ctx context.Context, note *domain.Note) error
@@ -60,6 +66,11 @@ type NoteRepositoryMock struct {
 			// ID is the id argument value.
 			ID string
 		}
+		// GetNoteAll holds details about calls to the GetNoteAll method.
+		GetNoteAll []struct {
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
+		}
 		// GetNoteByID holds details about calls to the GetNoteByID method.
 		GetNoteByID []struct {
 			// Ctx is the ctx argument value.
@@ -67,8 +78,8 @@ type NoteRepositoryMock struct {
 			// ID is the id argument value.
 			ID string
 		}
-		// GetNotes holds details about calls to the GetNotes method.
-		GetNotes []struct {
+		// GetNoteByUserId holds details about calls to the GetNoteByUserId method.
+		GetNoteByUserId []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// S is the s argument value.
@@ -82,10 +93,11 @@ type NoteRepositoryMock struct {
 			Note *domain.Note
 		}
 	}
-	lockDelete      sync.RWMutex
-	lockGetNoteByID sync.RWMutex
-	lockGetNotes    sync.RWMutex
-	lockSave        sync.RWMutex
+	lockDelete          sync.RWMutex
+	lockGetNoteAll      sync.RWMutex
+	lockGetNoteByID     sync.RWMutex
+	lockGetNoteByUserId sync.RWMutex
+	lockSave            sync.RWMutex
 }
 
 // Delete calls DeleteFunc.
@@ -121,6 +133,38 @@ func (mock *NoteRepositoryMock) DeleteCalls() []struct {
 	mock.lockDelete.RLock()
 	calls = mock.calls.Delete
 	mock.lockDelete.RUnlock()
+	return calls
+}
+
+// GetNoteAll calls GetNoteAllFunc.
+func (mock *NoteRepositoryMock) GetNoteAll(contextMoqParam context.Context) ([]*domain.Note, error) {
+	if mock.GetNoteAllFunc == nil {
+		panic("NoteRepositoryMock.GetNoteAllFunc: method is nil but NoteRepository.GetNoteAll was just called")
+	}
+	callInfo := struct {
+		ContextMoqParam context.Context
+	}{
+		ContextMoqParam: contextMoqParam,
+	}
+	mock.lockGetNoteAll.Lock()
+	mock.calls.GetNoteAll = append(mock.calls.GetNoteAll, callInfo)
+	mock.lockGetNoteAll.Unlock()
+	return mock.GetNoteAllFunc(contextMoqParam)
+}
+
+// GetNoteAllCalls gets all the calls that were made to GetNoteAll.
+// Check the length with:
+//
+//	len(mockedNoteRepository.GetNoteAllCalls())
+func (mock *NoteRepositoryMock) GetNoteAllCalls() []struct {
+	ContextMoqParam context.Context
+} {
+	var calls []struct {
+		ContextMoqParam context.Context
+	}
+	mock.lockGetNoteAll.RLock()
+	calls = mock.calls.GetNoteAll
+	mock.lockGetNoteAll.RUnlock()
 	return calls
 }
 
@@ -160,10 +204,10 @@ func (mock *NoteRepositoryMock) GetNoteByIDCalls() []struct {
 	return calls
 }
 
-// GetNotes calls GetNotesFunc.
-func (mock *NoteRepositoryMock) GetNotes(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
-	if mock.GetNotesFunc == nil {
-		panic("NoteRepositoryMock.GetNotesFunc: method is nil but NoteRepository.GetNotes was just called")
+// GetNoteByUserId calls GetNoteByUserIdFunc.
+func (mock *NoteRepositoryMock) GetNoteByUserId(contextMoqParam context.Context, s string) ([]*domain.Note, error) {
+	if mock.GetNoteByUserIdFunc == nil {
+		panic("NoteRepositoryMock.GetNoteByUserIdFunc: method is nil but NoteRepository.GetNoteByUserId was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
@@ -172,17 +216,17 @@ func (mock *NoteRepositoryMock) GetNotes(contextMoqParam context.Context, s stri
 		ContextMoqParam: contextMoqParam,
 		S:               s,
 	}
-	mock.lockGetNotes.Lock()
-	mock.calls.GetNotes = append(mock.calls.GetNotes, callInfo)
-	mock.lockGetNotes.Unlock()
-	return mock.GetNotesFunc(contextMoqParam, s)
+	mock.lockGetNoteByUserId.Lock()
+	mock.calls.GetNoteByUserId = append(mock.calls.GetNoteByUserId, callInfo)
+	mock.lockGetNoteByUserId.Unlock()
+	return mock.GetNoteByUserIdFunc(contextMoqParam, s)
 }
 
-// GetNotesCalls gets all the calls that were made to GetNotes.
+// GetNoteByUserIdCalls gets all the calls that were made to GetNoteByUserId.
 // Check the length with:
 //
-//	len(mockedNoteRepository.GetNotesCalls())
-func (mock *NoteRepositoryMock) GetNotesCalls() []struct {
+//	len(mockedNoteRepository.GetNoteByUserIdCalls())
+func (mock *NoteRepositoryMock) GetNoteByUserIdCalls() []struct {
 	ContextMoqParam context.Context
 	S               string
 } {
@@ -190,9 +234,9 @@ func (mock *NoteRepositoryMock) GetNotesCalls() []struct {
 		ContextMoqParam context.Context
 		S               string
 	}
-	mock.lockGetNotes.RLock()
-	calls = mock.calls.GetNotes
-	mock.lockGetNotes.RUnlock()
+	mock.lockGetNoteByUserId.RLock()
+	calls = mock.calls.GetNoteByUserId
+	mock.lockGetNoteByUserId.RUnlock()
 	return calls
 }
 

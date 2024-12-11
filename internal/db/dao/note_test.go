@@ -85,13 +85,72 @@ func Test_noteDao_GetNotes(t *testing.T) {
 			n := &noteDao{
 				query: tt.fields.query,
 			}
-			got, err := n.GetNotes(tt.args.ctx, tt.args.userId)
+			got, err := n.GetNoteByUserId(tt.args.ctx, tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("noteDao.GetNotes() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("noteDao.GetNotes() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_noteDao_GetNoteAll(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	dbmock, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	res := []*domain.Note{
+		{ID: "1", UserID: "1", Title: "title1", Content: "content1", Tags: []string{"tags1", "tags2", "tags3"}, CreatedDateTime: "2024-08-15 00:00:00", UpdatedDateTime: "2024-08-15 00:00:00"},
+	}
+
+	expected := db.GetNotesRow{
+		ID:        1,
+		NoteID:    "1",
+		Title:     "title1",
+		Tags:      "tags1,tags2,tags3",
+		Content:   "content1",
+		CreatedAt: sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
+		UpdatedAt: sql.NullString{String: "2024-08-15 00:00:00 +0000 UTC", Valid: true},
+		UserID:    "1",
+	}
+
+	rows := sqlmock.NewRows([]string{"id", "notes.note_id", "title", "tags", "content", "created_at", "updated_at", "user_id"})
+	rows.AddRow(expected.ID, expected.NoteID, expected.Title, expected.Tags, expected.Content, expected.CreatedAt.String, expected.UpdatedAt.String, expected.UserID)
+	mock.ExpectQuery(`SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id FROM notes JOIN user_notes ON notes.note_id = user_notes.note_id WHERE deleted_at IS NULL ORDER BY created_at DESC`).WillReturnRows(rows)
+
+	type fields struct {
+		query *db.Queries
+	}
+	type args struct {
+		ctx context.Context
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []*domain.Note
+		wantErr bool
+	}{
+		{name: "success", fields: fields{query: db.New(dbmock)}, args: args{ctx: ctx}, want: res},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			n := &noteDao{
+				query: tt.fields.query,
+			}
+			got, err := n.GetNoteAll(tt.args.ctx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("noteDao.GetNoteAll() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("noteDao.GetNoteAll() = %v, want %v", got, tt.want)
 			}
 		})
 	}

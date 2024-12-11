@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile
       target: dev
     environment:
-      ENV: DEV
+      ENV: test
       APP_NAME: note_app
       PORT: 8080
       DATABASE_URL: user:P@ssw0rd@tcp(db:3306)/note_app?parseTime=true

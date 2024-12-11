@@ -37,7 +37,8 @@ type Query {
   getUser(id: ID!): User
   getUsers: [User]
 
-  getNotes(userId: ID!): Notes
+  getNotesByUserId(userId: ID!): Notes
+  getNoteAll: [Note]
   getNoteById(id: ID!): NoteByAuthor
 }
 

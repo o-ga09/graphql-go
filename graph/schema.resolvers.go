@@ -194,9 +194,9 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
 	return res, nil
 }
 
-// GetNotes is the resolver for the getNotes field.
-func (r *queryResolver) GetNotes(ctx context.Context, userID string) (*model.Notes, error) {
-	note, err := r.NoteService.FetchNotes(ctx, userID)
+// GetNotesByUserID is the resolver for the getNotesByUserId field.
+func (r *queryResolver) GetNotesByUserID(ctx context.Context, userID string) (*model.Notes, error) {
+	note, err := r.NoteService.FetchNotesByUserId(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -243,6 +243,44 @@ func (r *queryResolver) GetNotes(ctx context.Context, userID string) (*model.Not
 			Displayname: user.DisplayName,
 		},
 	}, nil
+}
+
+// GetNoteAll is the resolver for the getNoteAll field.
+func (r *queryResolver) GetNoteAll(ctx context.Context) ([]*model.Note, error) {
+	notes, err := r.NoteService.FetchNoteAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res := []*model.Note{}
+	for _, n := range notes {
+		createdDateTime, err := date.TimeToString(n.CreatedDateTime)
+		if err != nil {
+			return nil, err
+		}
+		updatedDateTime, err := date.TimeToString(n.UpdatedDateTime)
+		if err != nil {
+			return nil, err
+		}
+
+		tags := []*model.PostTag{}
+		for _, t := range n.Tags {
+			tags = append(tags, &model.PostTag{
+				Name: t,
+			})
+		}
+
+		res = append(res, &model.Note{
+			NoteID:    n.ID,
+			Title:     n.Title,
+			Content:   n.Content,
+			Tags:      tags,
+			CreatedAt: createdDateTime,
+			UpdatedAt: updatedDateTime,
+		})
+	}
+
+	return res, nil
 }
 
 // GetNoteByID is the resolver for the getNoteById field.

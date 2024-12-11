@@ -1,6 +1,6 @@
 {
   "data": {
-    "getNotes": {
+    "getNotesByUserId": {
       "count": 2,
       "notes": [
         {

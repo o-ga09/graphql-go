@@ -1,5 +1,5 @@
 {
-  getNotes(userId: "1") {
+  getNotesByUserId(userId: "1") {
     count
     notes {
       noteId

@@ -100,6 +100,9 @@ func Test_E2E_Note(t *testing.T) {
 		"TestGetNotes": {
 			statusCode: 200,
 		},
+		"TestGetNoteAll": {
+			statusCode: 200,
+		},
 		"TestGetNoteById": {
 			statusCode: 200,
 		},

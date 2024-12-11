@@ -1,0 +1,10 @@
+{
+  getNoteAll{
+    noteId
+    title
+    tags{
+      name
+    }
+    content
+  }
+}
